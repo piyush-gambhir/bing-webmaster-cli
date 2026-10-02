@@ -1,0 +1,28 @@
+version: 2
+project_name: bing-webmaster-cli
+builds:
+  - binary: bwt
+    dir: cli-go
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/build.Version={{.Version}}
+      - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/build.Commit={{.Commit}}
+      - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/build.Date={{.Date}}
+      - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/auth.ClientID={{ envOrDefault "BWT_OAUTH_CLIENT_ID" "" }}
+      - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/auth.ClientSecret={{ envOrDefault "BWT_OAUTH_CLIENT_SECRET" "" }}
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
+    files:
+      - LICENSE
+      - README.md
+checksum:
+  name_template: checksums.txt
+changelog:
+  sort: asc

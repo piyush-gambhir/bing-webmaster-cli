@@ -1,0 +1,569 @@
+{
+ "source": "learn.microsoft.com IWebmasterApi method reference pages",
+ "captured": "2026-10-03",
+ "interface_page": {
+  "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi?view=bing-webmaster-dotnet",
+  "updated_at": "2023-11-14T06:46:00Z",
+  "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+ },
+ "methods": [
+  {
+   "method": "AddBlockedUrl",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddBlockedUrl(string siteUrl, Microsoft.Bing.Webmaster.Api.Interfaces.BlockedUrl blockedUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.addblockedurl?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "AddConnectedPage",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddConnectedPage(string siteUrl, string masterUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.addconnectedpage?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "AddCountryRegionSettings",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddCountryRegionSettings(string siteUrl, Microsoft.Bing.Webmaster.Api.Interfaces.CountryRegionSettings settings);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.addcountryregionsettings?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "AddDeepLinkBlock",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddDeepLinkBlock(string siteUrl, string market, string searchUrl, string deepLinkUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.adddeeplinkblock?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "AddPagePreviewBlock",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddPagePreviewBlock(string siteUrl, string url, Microsoft.Bing.Webmaster.Shared.DataContracts.BlockReason reason);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.addpagepreviewblock?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "AddQueryParameter",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddQueryParameter(string siteUrl, string queryParameter);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.addqueryparameter?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "AddSite",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddSite(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.addsite?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "AddSiteRoles",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void AddSiteRoles(string siteUrl, string delegatedUrl, string userEmail, string authenticationCode, bool isAdministrator, bool isReadOnly);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.addsiteroles?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "EnableDisableQueryParameter",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void EnableDisableQueryParameter(string siteUrl, string queryParameter, bool isEnabled);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.enabledisablequeryparameter?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "FetchUrl",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void FetchUrl(string siteUrl, string url);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.fetchurl?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetActivePagePreviewBlocks",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Shared.DataContracts.PagePreview> GetActivePagePreviewBlocks(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getactivepagepreviewblocks?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetBlockedUrls",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.BlockedUrl> GetBlockedUrls(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getblockedurls?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetChildrenUrlInfo",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.UrlInfo> GetChildrenUrlInfo(string siteUrl, string url, ushort page, Microsoft.Bing.Webmaster.Api.Interfaces.FilterProperties filterProperties);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getchildrenurlinfo?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetChildrenUrlTrafficInfo",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.UrlTrafficInfo> GetChildrenUrlTrafficInfo(string siteUrl, string url, ushort page);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getchildrenurltrafficinfo?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetConnectedPages",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Shared.DataContracts.ConnectedSite> GetConnectedPages(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getconnectedpages?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetContentSubmissionQuota",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.ContentSubmissionQuota GetContentSubmissionQuota(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getcontentsubmissionquota?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetCountryRegionSettings",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.CountryRegionSettings> GetCountryRegionSettings(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getcountryregionsettings?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetCrawlIssues",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.UrlWithCrawlIssues> GetCrawlIssues(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getcrawlissues?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetCrawlSettings",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.CrawlSettings GetCrawlSettings(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getcrawlsettings?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetCrawlStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.CrawlStats> GetCrawlStats(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getcrawlstats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetDeepLink",
+   "http": "GET",
+   "obsolete": true,
+   "signature": "[System.Obsolete(\"use GetDeepLinkBlocks\", true)] [System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.DeepLink> GetDeepLink(string siteUrl, string url);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getdeeplink?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetDeepLinkAlgoUrls",
+   "http": "GET",
+   "obsolete": true,
+   "signature": "[System.Obsolete(\"no longer in use\", true)] [System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.DeepLinkAlgoUrl> GetDeepLinkAlgoUrls(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getdeeplinkalgourls?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetDeepLinkBlocks",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Shared.DataContracts.DeepLinkBlock> GetDeepLinkBlocks(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getdeeplinkblocks?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetFeedDetails",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.Feed> GetFeedDetails(string siteUrl, string feedUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getfeeddetails?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetFeeds",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.Feed> GetFeeds(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getfeeds?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetFetchedUrlDetails",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.FetchedUrlDetails GetFetchedUrlDetails(string siteUrl, string url);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getfetchedurldetails?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetFetchedUrls",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.FetchedUrl> GetFetchedUrls(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getfetchedurls?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetKeyword",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.Keyword GetKeyword(string q, string country, string language, DateTime startDate, DateTime endDate);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getkeyword?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetKeywordStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.KeywordStats> GetKeywordStats(string q, string country, string language);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getkeywordstats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetLinkCounts",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.LinkCounts GetLinkCounts(string siteUrl, short page);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getlinkcounts?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetPageQueryStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.QueryStats> GetPageQueryStats(string siteUrl, string page);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getpagequerystats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetPageStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.QueryStats> GetPageStats(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getpagestats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetQueryPageDetailStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.DetailedQueryStats> GetQueryPageDetailStats(string siteUrl, string query, string page);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getquerypagedetailstats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetQueryPageStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.QueryStats> GetQueryPageStats(string siteUrl, string query);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getquerypagestats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetQueryParameters",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.QueryParameter> GetQueryParameters(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getqueryparameters?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetQueryStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.QueryStats> GetQueryStats(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getquerystats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetQueryTrafficStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.RankAndTrafficStats> GetQueryTrafficStats(string siteUrl, string query);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getquerytrafficstats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetRankAndTrafficStats",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.RankAndTrafficStats> GetRankAndTrafficStats(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getrankandtrafficstats?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetRelatedKeywords",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.Keyword> GetRelatedKeywords(string q, string country, string language, DateTime startDate, DateTime endDate);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getrelatedkeywords?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetSiteMoves",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.SiteMoveSettings> GetSiteMoves(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getsitemoves?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetSiteRoles",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.SiteRoles> GetSiteRoles(string siteUrl, bool includeAllSubdomains);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getsiteroles?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetUrlInfo",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.UrlInfo GetUrlInfo(string siteUrl, string url);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.geturlinfo?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetUrlLinks",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.LinkDetails GetUrlLinks(string siteUrl, string link, short page);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.geturllinks?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetUrlSubmissionQuota",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.UrlSubmissionQuota GetUrlSubmissionQuota(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.geturlsubmissionquota?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetUrlTrafficInfo",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public Microsoft.Bing.Webmaster.Api.Interfaces.UrlTrafficInfo GetUrlTrafficInfo(string siteUrl, string url);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.geturltrafficinfo?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "GetUserSites",
+   "http": "GET",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebGet(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest)] public System.Collections.Generic.List<Microsoft.Bing.Webmaster.Api.Interfaces.Site> GetUserSites();",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getusersites?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemoveBlockedUrl",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemoveBlockedUrl(string siteUrl, Microsoft.Bing.Webmaster.Api.Interfaces.BlockedUrl blockedUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removeblockedurl?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemoveCountryRegionSettings",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemoveCountryRegionSettings(string siteUrl, Microsoft.Bing.Webmaster.Api.Interfaces.CountryRegionSettings settings);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removecountryregionsettings?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemoveDeepLinkBlock",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemoveDeepLinkBlock(string siteUrl, string market, string searchUrl, string deepLinkUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removedeeplinkblock?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemoveFeed",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemoveFeed(string siteUrl, string feedUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removefeed?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemovePagePreviewBlock",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemovePagePreviewBlock(string siteUrl, string url);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removepagepreviewblock?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemoveQueryParameter",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemoveQueryParameter(string siteUrl, string queryParameter);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removequeryparameter?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemoveSite",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemoveSite(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removesite?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "RemoveSiteRole",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void RemoveSiteRole(string siteUrl, Microsoft.Bing.Webmaster.Api.Interfaces.SiteRoles siteRole);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.removesiterole?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "SaveCrawlSettings",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void SaveCrawlSettings(string siteUrl, Microsoft.Bing.Webmaster.Api.Interfaces.CrawlSettings crawlSettings);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.savecrawlsettings?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "SubmitContent",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void SubmitContent(string siteUrl, string url,string httpMessage, string structuredData, int dynamicServing);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.submitcontent?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "SubmitFeed",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void SubmitFeed(string siteUrl, string feedUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.submitfeed?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "SubmitSiteMove",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void SubmitSiteMove(string siteUrl, Microsoft.Bing.Webmaster.Api.Interfaces.SiteMoveSettings settings);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.submitsitemove?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "SubmitUrl",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void SubmitUrl(string siteUrl, string url);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.submiturl?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "SubmitUrlBatch",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void SubmitUrlBatch(string siteUrl, List<string> urlList);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.submiturlbatch?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "UpdateDeepLink",
+   "http": "POST",
+   "obsolete": true,
+   "signature": "[System.Obsolete(\"use AddDeepLinkBlocks\", true)] [System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public void UpdateDeepLink(string siteUrl, string algoUrl, string deepLink, Microsoft.Bing.Webmaster.Api.Interfaces.DeepLink.DeepLinkWeight weight);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.updatedeeplink?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  },
+  {
+   "method": "VerifySite",
+   "http": "POST",
+   "obsolete": false,
+   "signature": "[System.ServiceModel.FaultContract(typeof(Microsoft.Bing.Webmaster.Api.Interfaces.ApiFault))] [System.ServiceModel.OperationContract] [System.ServiceModel.Web.WebInvoke(BodyStyle=System.ServiceModel.Web.WebMessageBodyStyle.WrappedRequest, Method=\"POST\")] public bool VerifySite(string siteUrl);",
+   "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.verifysite?view=bing-webmaster-dotnet",
+   "updated_at": "2023-11-14T06:46:00Z",
+   "git_commit_id": "c23de406dd3bbb02346c29d6b11403443b6a7d64"
+  }
+ ]
+}
