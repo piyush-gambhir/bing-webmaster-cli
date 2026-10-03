@@ -7,6 +7,11 @@ Designed for people and coding agents: one-command browser login, named profiles
 output, an effect-based `--read-only` mode, and a single cross-platform binary. Covers all 59 non-obsolete
 methods of the Bing Webmaster JSON API plus IndexNow. Independent project; not affiliated with Microsoft.
 
+[![CI](https://github.com/piyush-gambhir/bing-webmaster-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/piyush-gambhir/bing-webmaster-cli/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/piyush-gambhir/bing-webmaster-cli)](https://github.com/piyush-gambhir/bing-webmaster-cli/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/piyush-gambhir/bing-webmaster-cli/badge)](https://scorecard.dev/viewer/?uri=github.com/piyush-gambhir/bing-webmaster-cli)
+
 ## Install
 
 ```bash
@@ -29,6 +34,15 @@ make install          # $(go env GOPATH)/bin/bwt, or INSTALL_DIR=...
 
 Source builds have no built-in OAuth client unless `cli-go/.env.local` provides one (see
 [docs/auth.md](docs/auth.md)); API-key login always works.
+
+### Verify a download
+
+Releases are immutable once published and ship SBOMs plus signed build-provenance attestations. To confirm an
+archive was built by this repository's release workflow:
+
+```bash
+gh attestation verify bing-webmaster-cli_darwin_arm64.tar.gz --repo piyush-gambhir/bing-webmaster-cli
+```
 
 ## Quick start
 

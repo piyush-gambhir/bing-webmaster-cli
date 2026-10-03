@@ -29,8 +29,10 @@ repository. Secrets inside distributed binaries can be extracted and are not tre
 ## Scope
 
 Commands that change Bing state are marked in the [API coverage map](docs/api-coverage.md) and blocked by
-`--read-only`. `update` replaces the local executable after SHA-256 checksum verification; checksums detect
-corruption or mismatched downloads but are not a separate publisher signature.
+`--read-only`. `update` replaces the local executable after SHA-256 checksum verification.
+
+Releases are immutable once published and include SBOMs and signed build-provenance attestations; verify an
+archive with `gh attestation verify <archive> --repo piyush-gambhir/bing-webmaster-cli`.
 
 Microsoft controls the upstream APIs. Report Bing service vulnerabilities through Microsoft's security
 reporting process rather than this repository.
