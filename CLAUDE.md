@@ -23,3 +23,5 @@ Use `bwt --help` and `docs/commands.md` for current flags; `bwt/SKILL.md` has op
 - Do not present performance rows as complete, submissions as indexed, or empty legacy results as healthy.
 - Tests use fake transports, temporary configs, and `keyring.MockInit()`; never the network or a real keychain.
 - Document user-visible changes in README.md, docs/, and `bwt/SKILL.md`.
+- Releases: bump `cli-go/VERSION` in a pull request; merging to `main` tags and publishes it (see
+  CONTRIBUTING.md). Never push release tags by hand. `main` requires pull requests and passing checks.

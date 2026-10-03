@@ -3,7 +3,6 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
@@ -35,7 +34,7 @@ func (a *app) sitemapsCmd() *cobra.Command {
 func (a *app) readURLs(args []string, file string) ([]string, error) {
 	list := append([]string{}, args...)
 	if file != "" {
-		var r io.Reader = a.in
+		r := a.in
 		if file != "-" {
 			f, err := os.Open(file)
 			if err != nil {
