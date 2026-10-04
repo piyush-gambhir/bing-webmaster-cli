@@ -5,7 +5,8 @@ COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 DATE ?= $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 
 LDFLAGS := -s -w -X $(MODULE)/internal/build.Version=$(VERSION) -X $(MODULE)/internal/build.Commit=$(COMMIT) -X $(MODULE)/internal/build.Date=$(DATE)
-INSTALL_DIR ?= $(shell go env GOPATH)/bin
+# Like go install: $GOBIN when set, else $(go env GOPATH)/bin.
+INSTALL_DIR ?= $(or $(shell go env GOBIN),$(shell go env GOPATH)/bin)
 
 .PHONY: build install test vet fmt tidy docs
 build:

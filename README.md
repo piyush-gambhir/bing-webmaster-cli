@@ -33,7 +33,7 @@ From source (Go 1.26+, toolchain 1.27.1):
 git clone https://github.com/piyush-gambhir/bing-webmaster-cli.git
 cd bing-webmaster-cli/cli-go
 make build            # bin/bwt
-make install          # $(go env GOPATH)/bin/bwt, or INSTALL_DIR=...
+make install          # $GOBIN or $(go env GOPATH)/bin, or INSTALL_DIR=...
 ```
 
 ### Update

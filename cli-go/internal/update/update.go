@@ -262,6 +262,9 @@ func notWritable(dir, goos string, err error) error {
 	return fmt.Errorf("cannot update bwt: %s is not writable (%v). Re-run with sudo, or reinstall into a directory you own with the install script (installs to ~/.local/bin): curl -fsSL https://raw.githubusercontent.com/%s/main/install.sh | sh; the installed bwt is unchanged", dir, err, Repo)
 }
 
+// rename is os.Rename; tests make it fail to exercise the Windows rollback.
+var rename = os.Rename
+
 // Replace swaps the executable at exe for bin. The new file is written next to
 // exe first, so a failure leaves the old binary in place. On Windows a running
 // executable cannot be overwritten or deleted but can be renamed, so it moves
@@ -290,15 +293,15 @@ func Replace(exe string, bin []byte, goos string) error {
 		return err
 	}
 	if goos != "windows" {
-		return os.Rename(tmp, exe)
+		return rename(tmp, exe)
 	}
 	old := exe + ".old"
 	_ = os.Remove(old) // left by an earlier update
-	if err := os.Rename(exe, old); err != nil {
+	if err := rename(exe, old); err != nil {
 		return fmt.Errorf("moving the running bwt aside: %w", err)
 	}
-	if err := os.Rename(tmp, exe); err != nil {
-		if rerr := os.Rename(old, exe); rerr != nil {
+	if err := rename(tmp, exe); err != nil {
+		if rerr := rename(old, exe); rerr != nil {
 			return fmt.Errorf("installing the new bwt: %w; restoring the previous one also failed (%v): rename %s to %s", err, rerr, old, exe)
 		}
 		return fmt.Errorf("installing the new bwt: %w", err)

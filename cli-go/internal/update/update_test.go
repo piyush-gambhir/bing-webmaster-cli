@@ -239,6 +239,27 @@ func TestReplaceWindowsRenamesTheRunningExeAside(t *testing.T) {
 	}
 }
 
+func TestReplaceWindowsRestoresTheOldExeWhenTheMoveFails(t *testing.T) {
+	dir := t.TempDir()
+	exe := writeExe(t, dir, "bwt.exe", "old")
+	rename = func(from, to string) error {
+		if to == exe && from != exe+".old" {
+			return fmt.Errorf("sharing violation")
+		}
+		return os.Rename(from, to)
+	}
+	t.Cleanup(func() { rename = os.Rename })
+	if err := Replace(exe, []byte("new"), "windows"); err == nil || !strings.Contains(err.Error(), "sharing violation") {
+		t.Fatalf("want the move error, got %v", err)
+	}
+	if got := read(t, exe); got != "old" {
+		t.Fatalf("exe holds %q after rollback", got)
+	}
+	if entries, _ := os.ReadDir(dir); len(entries) != 1 {
+		t.Fatalf("leftover files after rollback: %v", entries)
+	}
+}
+
 func TestUnwritableDirectoryKeepsTheOldBinary(t *testing.T) {
 	if runtime.GOOS == "windows" || os.Geteuid() == 0 {
 		t.Skip("needs POSIX permissions and a non-root user")
@@ -326,8 +347,11 @@ func TestCacheTimingAndNotice(t *testing.T) {
 	if !(Cache{CheckedAt: now.Add(-25 * time.Hour)}).Due(now) {
 		t.Fatal("a check older than 24h is due")
 	}
-	if (Cache{CheckedAt: now.Add(-25 * time.Hour), AttemptedAt: now.Add(-time.Minute)}).Due(now) {
-		t.Fatal("an unfinished attempt a minute ago must not retry yet")
+	if (Cache{CheckedAt: now.Add(-25 * time.Hour), AttemptedAt: now.Add(-2 * time.Hour)}).Due(now) {
+		t.Fatal("an unfinished attempt within 24h must not retry yet")
+	}
+	if !(Cache{AttemptedAt: now.Add(-25 * time.Hour)}).Due(now) {
+		t.Fatal("an unfinished attempt older than 24h is due")
 	}
 
 	c := Cache{LatestVersion: "0.1.4"}

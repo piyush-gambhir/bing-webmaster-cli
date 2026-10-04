@@ -83,8 +83,9 @@ func (a *app) updateCmd() *cobra.Command {
 			}
 			if !a.yes && a.terminal() {
 				fmt.Fprintf(a.errOut, "bwt %s -> %s\nUpdate now? [Y/n] ", from, to)
-				line, _ := bufio.NewReader(a.in).ReadString('\n')
-				if answer := strings.ToLower(strings.TrimSpace(line)); answer != "" && answer != "y" && answer != "yes" {
+				line, err := bufio.NewReader(a.in).ReadString('\n')
+				// Enter means yes; Ctrl-D (EOF) or a read error is not an answer.
+				if answer := strings.ToLower(strings.TrimSpace(line)); err != nil || (answer != "" && answer != "y" && answer != "yes") {
 					return errors.New("update cancelled")
 				}
 			}

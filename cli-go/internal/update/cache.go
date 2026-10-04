@@ -18,9 +18,6 @@ const (
 	CheckInterval = 24 * time.Hour
 	// CheckTimeout bounds the background release check.
 	CheckTimeout = 3 * time.Second
-	// retryAfter spaces out checks that never finished because the command
-	// exited first, so short commands cannot cause a request storm.
-	retryAfter = time.Hour
 )
 
 // Cache is update-check.json.
@@ -90,9 +87,11 @@ func Record(dir string, r *Release, checkErr error, now time.Time) Cache {
 	return c
 }
 
-// Due reports whether the background check should query GitHub.
+// Due reports whether the background check should query GitHub. A check that
+// never finished (the command exited first) also counts, so GitHub is asked at
+// most once per CheckInterval.
 func (c Cache) Due(now time.Time) bool {
-	return expired(c.CheckedAt, now, CheckInterval) && expired(c.AttemptedAt, now, retryAfter)
+	return expired(c.CheckedAt, now, CheckInterval) && expired(c.AttemptedAt, now, CheckInterval)
 }
 
 // ShouldNotify reports whether to print the notice: a newer release is known
