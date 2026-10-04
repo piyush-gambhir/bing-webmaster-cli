@@ -24,7 +24,13 @@ Do not include real API keys or private site data in a public issue.
 ## Scope
 
 Commands that change Bing state are marked in the [API coverage map](docs/api-coverage.md) and blocked by
-`--read-only`. `update` replaces the local executable after SHA-256 checksum verification.
+`--read-only`. `update` replaces the local executable after SHA-256 checksum verification, extracting only
+the `bwt` (or `bwt.exe`) regular file from the archive; a failed update leaves the old binary in place.
+
+In an interactive terminal, `bwt` asks GitHub for the latest release at most once a day (an anonymous
+request with no account or usage data) to print an update notice. It never runs when stderr is not a
+terminal or `CI` is set, and `BWT_NO_UPDATE_NOTIFIER=1`, `NO_UPDATE_NOTIFIER=1`, or `--quiet` turns it off.
+The result is cached in `update-check.json` in the config directory.
 
 Releases are immutable once published and include SBOMs and signed build-provenance attestations; verify an
 archive with `gh attestation verify <archive> --repo piyush-gambhir/bing-webmaster-cli`.

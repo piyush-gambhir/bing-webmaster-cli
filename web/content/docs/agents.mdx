@@ -42,11 +42,15 @@ redaction, error handling, and date conversion. Unknown methods count as writes.
 | `--read-only` | `BWT_READ_ONLY=1` | Blocks remote writes, credential changes, and self-update |
 | `--no-input` | `BWT_NO_INPUT=1` | Never prompts or opens a browser; commands fail instead |
 | `--dry-run` | | Prints every write request, including each batch, and sends nothing |
-| `--yes` | | Confirms destructive commands without a prompt |
+| `--yes`, `-y` | | Confirms destructive commands and `update` without a prompt |
 | `--quiet` | `BWT_QUIET=1` | Drops informational notes from stderr |
 | `--verbose` | `BWT_VERBOSE=1` | Logs method, redacted URL, and status to stderr |
 | `--site` | `BWT_SITE` | Site for this command |
 | `--profile` | `BWT_PROFILE` | Saved profile for this command |
+
+Agents never see the update notice: its once-a-day GitHub check runs only when stderr is a terminal, and
+`BWT_NO_UPDATE_NOTIFIER=1` turns it off everywhere. `bwt update --check -o json` reports
+`current_version`, `latest_version`, `update_available`, `release_url`, and `install_method`.
 
 ## Reporting results honestly
 

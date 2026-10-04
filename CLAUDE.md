@@ -23,7 +23,11 @@ Use `bwt --help` and `docs/commands.md` for current flags; `bwt/SKILL.md` has op
 - Bing quirks verified live: country codes (geo) and market codes (deep-link blocks) must be lowercase;
   URL information methods returned UnknownError on a site without crawl data (cause undocumented, so never
   report it as "not indexed"); GetSiteMoves returns 404.
-- Preserve stdout as command data and stderr as diagnostics. No automatic retries, no background calls.
+- Preserve stdout as command data and stderr as diagnostics. No automatic retries, and no background calls
+  except one: the update notice's release check (`cmd/notify.go`, `internal/update`). It runs at most once a
+  day, only when stderr is a terminal, never for `update`, `version`, `completion`, `help`, or dev builds,
+  and is off under `CI`, `--quiet`, `BWT_NO_UPDATE_NOTIFIER`, or `NO_UPDATE_NOTIFIER`. It never delays a
+  command: the notice prints after the output only if the answer is already in. Do not add others.
 - Do not present performance rows as complete, submissions as indexed, or empty legacy results as healthy.
 - Tests use fake transports, temporary configs, and `keyring.MockInit()`; never the network or a real keychain.
 - Document user-visible changes in README.md, docs/, `bwt/SKILL.md`, and the guide pages in

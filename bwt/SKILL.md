@@ -36,6 +36,15 @@ Use the installed `bwt` binary. Every subcommand has `--help`; the full referenc
   that exact change.
 - Check `bwt quota` before large `submit urls` runs. Repeated submissions spend quota even for the same URL.
 
+## Updating bwt
+
+- `bwt update --check -o json` reports `current_version`, `latest_version`, `update_available`,
+  `release_url`, and `install_method` (`self`, or `go` for a source build in a Go bin directory).
+- Install only when the user asks: `bwt update --yes --no-input` (macOS, Linux, and Windows). It verifies
+  the SHA-256 checksum and leaves the old binary in place on any failure; `--read-only` blocks it.
+- The once-a-day update notice runs only when stderr is a terminal, so agent runs never see it or trigger
+  its GitHub request. `BWT_NO_UPDATE_NOTIFIER=1` or `NO_UPDATE_NOTIFIER=1` turns it off everywhere.
+
 ## What the data means
 
 - `bwt stats ...` returns Bing's top rows only; the API has no date range or paging, so filters are local

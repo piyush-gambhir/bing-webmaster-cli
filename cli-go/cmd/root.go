@@ -7,12 +7,17 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/build"
 	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/client"
+	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/config"
 	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/output"
+	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/update"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +32,14 @@ type app struct {
 	transport http.RoundTripper
 	// openBrowser replaces the system browser for tests.
 	openBrowser func(string) error
+	// exePath and stderrTTY replace the running executable's path and stderr
+	// terminal detection for tests.
+	exePath   string
+	stderrTTY func() bool
+	// updateCheck carries the release check from PersistentPreRun to
+	// PersistentPostRun; checks tracks its background request.
+	updateCheck chan update.Cache
+	checks      sync.WaitGroup
 }
 
 func envBool(name string) bool { s := os.Getenv(name); return s == "1" || strings.EqualFold(s, "true") }
@@ -59,8 +72,10 @@ func newRoot(a *app) *cobra.Command {
 			if cmd.Annotations["experimental"] == "true" {
 				a.info("Experimental: Bing documents site moves, but GetSiteMoves returned HTTP 404 in a live check on 2026-10-04. Check the result in the Bing Webmaster Tools dashboard.")
 			}
+			a.startUpdateCheck(cmd)
 			return nil
 		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) { a.printUpdateNotice() },
 	}
 	root.SetIn(a.in)
 	root.SetOut(a.out)
@@ -77,7 +92,7 @@ func newRoot(a *app) *cobra.Command {
 	f.BoolVarP(&a.verbose, "verbose", "v", envBool("BWT_VERBOSE"), "Log method, redacted URL, and status to stderr")
 	f.BoolVar(&a.readOnly, "read-only", envBool("BWT_READ_ONLY"), "Block remote writes, local credential changes, and self-update")
 	f.BoolVar(&a.dryRun, "dry-run", false, "For writes: print the requests and send nothing")
-	f.BoolVar(&a.yes, "yes", false, "Confirm destructive commands without a prompt")
+	f.BoolVarP(&a.yes, "yes", "y", false, "Confirm destructive commands and updates without a prompt")
 	f.BoolVar(&a.raw, "raw", false, "Print Bing's wire JSON without date conversion")
 
 	root.AddCommand(a.authCmd(), a.configCmd(), a.sitesCmd(), a.statsCmd(), a.crawlCmd(), a.urlCmd(),
@@ -90,8 +105,15 @@ func newRoot(a *app) *cobra.Command {
 	status := a.statusCmd()
 	status.Short = "Alias for auth status"
 	root.AddCommand(status)
-	root.AddCommand(&cobra.Command{Use: "version", Short: "Print build information", Args: cobra.NoArgs, RunE: func(cmd *cobra.Command, args []string) error {
-		return a.print(map[string]string{"version": build.Version, "commit": build.Commit, "date": build.Date})
+	root.AddCommand(&cobra.Command{Use: "version", Short: "Print build information", Long: "Prints the version, commit, and build date. latest and update_available come from the last\nrelease check (see bwt update --help) and appear only when one is cached; version never uses the network.", Args: cobra.NoArgs, RunE: func(cmd *cobra.Command, args []string) error {
+		info := map[string]any{"version": build.Version, "commit": build.Commit, "date": build.Date}
+		if dir, err := config.Dir(); err == nil {
+			if c := update.ReadCache(dir); c.LatestVersion != "" {
+				info["latest"] = c.LatestVersion
+				info["update_available"] = update.Newer(c.LatestVersion, build.Version)
+			}
+		}
+		return a.print(info)
 	}})
 	root.AddCommand(&cobra.Command{Use: "completion [bash|zsh|fish|powershell]", Short: "Generate shell completion script", Args: cobra.ExactArgs(1), ValidArgs: []string{"bash", "zsh", "fish", "powershell"}, RunE: func(cmd *cobra.Command, args []string) error {
 		switch args[0] {
@@ -114,6 +136,14 @@ func newRoot(a *app) *cobra.Command {
 // Run executes the CLI and returns the process exit code. Errors go to stderr,
 // structured in JSON and YAML modes, with credentials redacted.
 func Run(ctx context.Context, args []string, in io.Reader, out, errOut io.Writer) int {
+	if runtime.GOOS == "windows" {
+		// A Windows self-update leaves the replaced bwt.exe.old behind.
+		if exe, err := os.Executable(); err == nil {
+			if exe, err = filepath.EvalSymlinks(exe); err == nil {
+				update.RemoveLeftover(exe)
+			}
+		}
+	}
 	return execute(ctx, &app{in: in, out: out, errOut: errOut}, args)
 }
 

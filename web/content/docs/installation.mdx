@@ -47,14 +47,43 @@ Requires Go 1.26 or later:
 ```bash
 git clone https://github.com/piyush-gambhir/bing-webmaster-cli.git
 cd bing-webmaster-cli/cli-go
-make install    # installs to $(go env GOPATH)/bin
+make install    # installs to $GOBIN or $(go env GOPATH)/bin
 ```
 
 ## Check and update
 
 ```bash
-bwt version
-bwt doctor              # configuration, credentials, default site, and PATH; no network
-bwt update --check      # is a newer release out?
-bwt update              # install it after SHA-256 verification
+bwt version             # build info, plus the latest version from the last release check
+bwt doctor              # configuration, credentials, default site, and PATH; no Bing calls
+bwt update --check      # is a newer release out? (-o json for scripts)
+bwt update              # asks, then installs it after SHA-256 verification
 ```
+
+`bwt update` works on macOS, Linux, and Windows. It downloads the release archive for your platform,
+checks it against the release's `checksums.txt`, and replaces the running executable. On Windows the old
+executable is renamed to `bwt.exe.old` and deleted the next time `bwt` starts. `--yes` (`-y`) skips the
+question, and `--no-input` requires `--yes`. If the install directory is not writable, the update stops and
+the old binary keeps working: re-run with `sudo`, or reinstall with the install script into a directory you
+own. A `bwt` in a Go bin directory (`$GOBIN`, `$GOPATH/bin`, or `~/go/bin`) came from a source build, so
+`bwt update` tells you to run `git pull && make install` in your checkout instead of replacing it.
+
+### Update notice
+
+In an interactive terminal, `bwt` checks GitHub for a new release at most once a day. When one is out, it
+prints a notice on stderr after the command's output, at most once a day per version:
+
+```text
+A new version of bwt is available: v0.1.3 -> v0.1.4
+Update with: bwt update
+Release notes: https://github.com/piyush-gambhir/bing-webmaster-cli/releases/tag/v0.1.4
+```
+
+The check never delays a command and never runs (no network, no output) when:
+
+- stderr is not a terminal (pipes, scripts, coding agents),
+- `CI` is set,
+- `--quiet` or `BWT_QUIET=1` is on,
+- `BWT_NO_UPDATE_NOTIFIER` or `NO_UPDATE_NOTIFIER` is set to any value, or
+- the command is `update`, `version`, `completion`, or `help`.
+
+To turn it off for good, add `export BWT_NO_UPDATE_NOTIFIER=1` to your shell profile.
