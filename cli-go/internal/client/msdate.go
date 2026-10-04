@@ -24,17 +24,28 @@ func ParseMSDate(s string) (time.Time, bool) {
 		return time.Time{}, false
 	}
 	t := time.UnixMilli(ms).UTC()
+	if !rfc3339Year(t) {
+		return time.Time{}, false
+	}
 	if m[2] != "" {
 		hours, _ := strconv.Atoi(m[2][1:3])
 		minutes, _ := strconv.Atoi(m[2][3:5])
+		if hours > 23 || minutes > 59 { // not an offset RFC 3339 can express
+			return time.Time{}, false
+		}
 		offset := hours*3600 + minutes*60
 		if m[2][0] == '-' {
 			offset = -offset
 		}
 		t = t.In(time.FixedZone("", offset))
 	}
-	return t, true
+	return t, rfc3339Year(t)
 }
+
+// rfc3339Year reports whether t's year fits RFC 3339's four digits. Year 0 is
+// allowed: .NET's DateTime.MinValue with a negative offset lands there. Values
+// outside the range are left as the original string.
+func rfc3339Year(t time.Time) bool { return t.Year() >= 0 && t.Year() <= 9999 }
 
 // FormatMSDate renders t for request bodies, using UTC.
 func FormatMSDate(t time.Time) string {
