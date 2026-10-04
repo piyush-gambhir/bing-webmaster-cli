@@ -18,8 +18,8 @@ Provide the command and redacted output. Never include API keys, OAuth tokens, c
 
 - `bwt version`:
 - OS and architecture:
-- Auth method (OAuth built-in client / OAuth own client / API key / access token):
-- Command group (sites / stats / crawl / url / links / sitemaps / submit / indexnow / keywords / fetch / users / params / block / preview-blocks / experimental / auth):
+- Auth method (saved API key / `BWT_API_KEY` / access token):
+- Command group (sites / stats / crawl / url / links / sitemaps / submit / indexnow / keywords / quota / fetch / users / params / block / preview-blocks / geo / deeplink-blocks / connected-pages / api / experimental / auth):
 
 ## Additional context
 
