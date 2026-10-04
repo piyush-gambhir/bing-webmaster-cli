@@ -111,9 +111,12 @@ func (a *app) statsQuery(use, short, method string, args []string, columns []out
 		if a.raw {
 			return a.print(result, columns...)
 		}
-		rows, err := stats.Apply(asList(client.ConvertDates(result)), f)
+		rows, err := stats.Apply(asList(client.Clean(result)), f)
 		if err != nil {
 			return err
+		}
+		if len(rows) == 0 && !f.Active() {
+			a.info("Bing has no performance data for this site yet; new or low-traffic sites can take days to show data.")
 		}
 		envelope := map[string]any{"site": site, "method": method, "update_cadence": cadence,
 			"filtered_locally": f.Active(), "row_count": len(rows), "rows": rows}
@@ -152,7 +155,7 @@ func (a *app) statsSummary() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		rows := asList(client.ConvertDates(result))
+		rows := asList(client.Clean(result))
 		envelope := map[string]any{"site": site, "method": "GetRankAndTrafficStats", "computed_locally": true, "window_days": days}
 		end, ok := stats.Latest(rows)
 		if !ok {

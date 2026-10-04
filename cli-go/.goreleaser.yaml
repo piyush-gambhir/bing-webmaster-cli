@@ -11,8 +11,6 @@ builds:
       - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/build.Version={{.Version}}
       - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/build.Commit={{.Commit}}
       - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/build.Date={{.Date}}
-      - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/auth.ClientID={{ envOrDefault "BWT_OAUTH_CLIENT_ID" "" }}
-      - -X github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/auth.ClientSecret={{ envOrDefault "BWT_OAUTH_CLIENT_SECRET" "" }}
 archives:
   - formats: [tar.gz]
     format_overrides:

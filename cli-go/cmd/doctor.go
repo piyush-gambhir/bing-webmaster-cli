@@ -33,11 +33,6 @@ func (a *app) doctorCmd() *cobra.Command {
 		} else {
 			add("config", "ok", path)
 		}
-		if _, _, ok := auth.Builtin(); ok {
-			add("oauth client", "ok", "built-in OAuth client present")
-		} else {
-			add("oauth client", "warn", "no built-in OAuth client in this build; use --with-api-key or BWT_CLIENT_ID/BWT_CLIENT_SECRET")
-		}
 		cr, credErr := a.resolve()
 		if credErr != nil {
 			add("credentials", "fail", credErr.Error())
@@ -46,12 +41,8 @@ func (a *app) doctorCmd() *cobra.Command {
 			if cr.profile != "" && cfg != nil {
 				p := cfg.Profiles[cr.profile]
 				store, err := a.store()
-				kind := "api_key"
-				if cr.kind == "oauth" {
-					kind = "oauth"
-				}
 				if err == nil {
-					_, err = store.Load(secrets.Backend(p.TokenStore), auth.SecretKey(cr.profile, kind))
+					_, err = store.Load(secrets.Backend(p.TokenStore), auth.SecretKey(cr.profile, "api_key"))
 				}
 				switch {
 				case err == nil:

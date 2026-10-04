@@ -11,14 +11,14 @@ make docs
 
 Run `gofmt -w .` within `cli-go/` after Go changes. Tests must use fake transports or local test servers and
 `keyring.MockInit()`; they must not contact Bing, IndexNow, or a real keychain. Configuration tests use
-temporary directories. Never commit API keys, OAuth tokens, client secrets, or `cli-go/.env.local`.
+temporary directories. Never commit API keys or other credentials.
 
 Where things go:
 
 - `internal/registry`: one entry per Bing method (verb, parameters, effect, status). It is checked against the
   vendored documentation snapshot; see [docs/compatibility.md](docs/compatibility.md).
 - `internal/client`: transport, `d` unwrapping, fault detection, date codec, redaction.
-- `internal/auth`, `internal/oauthflow`, `internal/secrets`: login, refresh, and secret storage.
+- `internal/auth`, `internal/secrets`: secret naming, the per-profile lock, and keychain storage.
 - `cmd`: command composition. Use `opCmd` or `annotate` so read/write effects come from the registry.
 - `internal/output`: table, JSON, YAML, and CSV rendering.
 
@@ -43,9 +43,8 @@ SBOMs), attests build provenance, and only then publishes the release. Published
 a mistake needs a new version. If a release fails, open that failed run in the Actions tab and choose
 Re-run jobs: it keeps the original commit and resumes the draft. A version that is already published is
 skipped, and releases only run from `main`. Versions with a suffix (`0.2.0-rc.1`) become pre-releases, and
-only the newest stable version is marked latest. Do not push tags by hand. Release builds read the built-in
-OAuth client from the `BWT_OAUTH_CLIENT_ID` and `BWT_OAUTH_CLIENT_SECRET` repository secrets (see
-`docs/auth.md`). After changing `.goreleaser.yaml`, run `goreleaser check --config cli-go/.goreleaser.yaml`;
+only the newest stable version is marked latest. Do not push tags by hand. Release builds need no repository
+secrets. After changing `.goreleaser.yaml`, run `goreleaser check --config cli-go/.goreleaser.yaml`;
 a local packaging check is `goreleaser release --snapshot --clean --skip=publish --config cli-go/.goreleaser.yaml`
 (SBOMs need Syft installed).
 

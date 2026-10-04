@@ -1,153 +1,87 @@
 # Authentication
 
-Bing Webmaster Tools offers two credentials: OAuth 2.0 (scopes `Webmaster.read` and `Webmaster.manage`)
-and an API key that covers every verified site in your account. `bwt` supports both, plus externally
-issued bearer tokens. IndexNow needs neither: it uses a public key hosted on your site.
+Bing Webmaster Tools signs API calls with an API key. One key belongs to your Microsoft account and covers
+every site you can access in Bing Webmaster Tools.
 
-## Quick reference
-
-| Method | Command | Best for | Saved |
-| --- | --- | --- | --- |
-| Browser login, built-in client | `bwt auth login` | Most people | refresh token in the OS keychain |
-| API key | `bwt auth login --with-api-key` | Servers, CI, or when the browser flow is unavailable | API key in the OS keychain |
-| API key from the environment | `BWT_API_KEY=... bwt ...` | CI with a secret manager | nothing |
-| Bearer token from the environment | `BWT_ACCESS_TOKEN=... bwt ...` | Tokens issued by your own tooling | nothing |
-| Your own OAuth client | `bwt auth login --client-id ID --client-secret-stdin --redirect-port N` | Teams that want their own app registration | refresh token and client secret in the keychain |
-| Read-only OAuth | `bwt auth login --scope read` | Least privilege | as browser login |
-
-Credential precedence: `--access-token`, then `BWT_ACCESS_TOKEN`, then `--api-key`, then `BWT_API_KEY`,
-then the selected profile. Profile selection: `--profile`, then `BWT_PROFILE`, then the saved current
-profile. An environment credential overrides a saved profile; `bwt auth status` shows which one is active.
-
-## Browser login (default)
+## Log in
 
 ```console
 $ bwt auth login
-Opening your browser to sign in. If it does not open, visit:
-  https://www.bing.com/webmasters/oauth/authorize?...
-Found 2 sites. Choose a default with: bwt sites use SITE
-auth         oauth
-profile      default
-saved        true
-sites        2
-token_store  keychain
-verified     true
+Log in with your Bing Webmaster Tools API key (one key covers all your sites):
+  1. Opening https://www.bing.com/webmasters
+  2. Go to Settings (gear icon) > API Access > API Key, then Generate or copy your key.
+  3. Paste it below. Input is hidden.
+Bing Webmaster API key:
+Logged in (profile "default"). Found 1 site; default site is https://www.example.com/ (change with: bwt sites use SITE).
 ```
 
 What happens:
 
-1. `bwt` binds `127.0.0.1:47619` (the redirect registered with the built-in client) **before** opening
-   the browser. If the port is busy, login stops and tells you; it never switches ports, because Bing
-   requires an exact redirect match.
-2. The consent URL carries a random `state` and PKCE S256 parameters. The URL is printed on stderr in
-   case the browser does not open.
-3. After you click Allow, `bwt` checks `state` (a missing or wrong value fails the login), exchanges
-   the code once, and saves the refresh token in the OS keychain.
-4. It calls `GetUserSites` once. With one site, that site becomes the profile's default; with several,
-   an interactive terminal shows a picker, otherwise you choose later with `bwt sites use SITE`.
+1. In a terminal, `bwt` opens Bing Webmaster Tools and reads the key from a hidden prompt. Piped input is
+   read from stdin instead, so scripts work too.
+2. The key is checked with one `GetUserSites` call **before** anything is saved. If Bing rejects it, nothing
+   is saved. A newly generated key can take about 30 minutes to start working; `--no-verify` saves it
+   without the check.
+3. The key goes into the OS keychain (macOS Keychain, Windows Credential Manager, or the Secret Service on
+   Linux). Without a keychain service, login stops unless you pass `--insecure-storage` (a 0600 plaintext
+   file).
+4. A default site is chosen: your only site, a numbered pick when you have several, or none under
+   `--no-input` (set one later with `bwt sites use SITE`).
 
-Access tokens last about an hour. `bwt` refreshes them on demand under a per-profile lock, so several
-commands running at once refresh only once. Bing's refresh tokens stay valid until access is revoked.
-
-`--no-input` never opens a browser; use `--with-api-key` with the key on stdin instead.
-
-## API key
-
-Generate a key in **Bing Webmaster Tools > Settings > API Access > API Key**. One key covers all your
-verified sites. A new key can take about 30 minutes to start working.
+## Without saving anything (CI and agents)
 
 ```bash
-bwt auth login --with-api-key                        # hidden prompt
-printf '%s' "$KEY" | bwt auth login --with-api-key --no-input --profile ci
-BWT_API_KEY="$KEY" bwt sites list                    # nothing saved
+BWT_API_KEY=... bwt sites list -o json                    # one command, nothing stored
+printf '%s' "$KEY" | bwt auth login --no-input --profile ci  # or save it to a named profile
 ```
 
-The key travels as the `apikey` query parameter, so `bwt` removes it from verbose logs, error messages,
-and transport errors itself. Prefer the environment variable or `auth login` over the `--api-key` flag,
-which can end up in shell history.
+Prefer the environment variable or stdin over `--api-key`, which can end up in shell history.
 
-## Where secrets live
+## Several accounts or clients
 
-Secrets go to the OS keychain: macOS Keychain, Windows Credential Manager, or the Secret Service on Linux.
-Entries are namespaced by config file: the default config uses the service `bing-webmaster-cli`, and any
-other path (`BWT_CONFIG`, a custom `XDG_CONFIG_HOME`, or one config per environment) gets
+Each profile is a separate login. `bwt auth login --profile client-b` adds one, `bwt auth list` shows them,
+`--profile NAME` or `BWT_PROFILE` picks one per command, and `bwt auth use NAME` changes the default. Parallel
+commands are safe: each profile has its own keychain entry, and login and logout take a per-profile lock.
+
+Keychain entries are namespaced by config file: the default config uses the service `bing-webmaster-cli`,
+and any other path (`BWT_CONFIG`, a custom `XDG_CONFIG_HOME`, or one config per environment) gets
 `bing-webmaster-cli (<hash>)`, so same-named profiles in different configs never overwrite each other.
-The config file (`~/.config/bing-webmaster-cli/config.yaml`, mode 0600) holds profile names, the auth
-method, the OAuth client ID, the default site, and IndexNow keys, which are public by design.
 
-Keychain calls time out after 10 seconds, so a locked keychain waiting for an unlock prompt fails cleanly.
-On a machine without a keychain service, login stops and offers two choices:
+## Bearer tokens
 
-- `--insecure-storage`: keep secrets in `secrets.yaml` next to the config, mode 0600, **unencrypted**.
-  The choice is recorded on the profile and reported by `bwt doctor`.
-- `BWT_API_KEY` or `BWT_ACCESS_TOKEN`: nothing is saved at all.
+`--access-token` or `BWT_ACCESS_TOKEN` sends a bearer token obtained elsewhere (for example from your own
+OAuth web application). Bearer calls go to `www.bing.com`, as Bing's OAuth guide shows;
+`BWT_OAUTH_API_HOST=ssl.bing.com` switches hosts.
 
-Each OAuth profile has two keychain items: the refresh token (with the client secret for your own
-client) and a cached access token. They are separate so each item stays under Windows Credential
-Manager's 2,560-byte limit.
+## Why there is no browser login
 
-## Logout and revocation
+Bing's OAuth client registration rejects loopback redirect URIs: `http://127.0.0.1:47619/callback` and
+`http://localhost:47619/callback` are both refused as "not a valid http or https url" (checked 2026-10-04).
+A command-line tool can only receive an OAuth code on the local machine, so browser OAuth would need a public
+web page that relays codes to the CLI. That adds a server and a place where codes can leak, while an API key
+gives the same access with one copy and paste.
 
-`bwt auth logout` deletes the profile's saved credentials and keeps its default site and IndexNow keys.
-Bing documents no token revocation endpoint, so to revoke access remove the app or regenerate the API key
-under **Bing Webmaster Tools > Settings > API Access**.
+## Credential precedence
 
-## Your own OAuth client
+`--access-token` > `BWT_ACCESS_TOKEN` > `--api-key` > `BWT_API_KEY` > the selected profile. Profile selection
+is `--profile` > `BWT_PROFILE` > the saved current profile. `bwt auth status` shows which source is active
+without a network call; add `--verify` for one `GetUserSites` check.
 
-1. In Bing Webmaster Tools, open **Settings > API Access**, accept the terms, choose **OAuth Client**, and
-   register your client with redirect URI `http://127.0.0.1:PORT/callback`.
-2. Log in with your client ID and the matching port. The secret is read from stdin, never from a flag:
+## Logging out and rotating the key
 
-```bash
-bwt auth login --client-id "$CLIENT_ID" --client-secret-stdin --redirect-port 8400 < client-secret.txt
-```
+`bwt auth logout` deletes the saved key from this machine and keeps the profile's site and IndexNow keys.
+It does not invalidate the key: Bing allows one API key per account, and regenerating it in **Settings >
+API Access** invalidates it everywhere. After regenerating, run `bwt auth login` again on each machine.
 
-The profile records the client ID, so refreshes always use the client that issued the token.
-
-## Built-in OAuth client: one-time owner setup
-
-Release binaries embed the project's OAuth client through build-time `-ldflags`. The values are never in
-the repository; a build without them still supports API keys, and `BWT_CLIENT_ID` / `BWT_CLIENT_SECRET`
-override them at run time.
-
-1. In Bing Webmaster Tools, open **Settings > API Access > OAuth Client** and register the name "bwt CLI"
-   with redirect URI `http://127.0.0.1:47619/callback`.
-2. Add the client ID and secret as repository secrets `BWT_OAUTH_CLIENT_ID` and
-   `BWT_OAUTH_CLIENT_SECRET` (the release workflow passes them to GoReleaser), and to an untracked
-   `cli-go/.env.local` for local builds:
-
-   ```make
-   BWT_OAUTH_CLIENT_ID=...
-   BWT_OAUTH_CLIENT_SECRET=...
-   ```
-
-3. Run the live checks below once and record the answers in [compatibility.md](compatibility.md).
-
-| Check | How | If it fails |
-| --- | --- | --- |
-| Bing accepts the loopback redirect | `bwt auth login` completes | Browser login is unusable; document `--with-api-key` as the login path |
-| Bing echoes `state` | Login succeeds (it fails closed without `state`) | Same as above |
-| PKCE is enforced | Optional: exchange a code without `code_verifier` using a test script | Note that PKCE is not enforced |
-| Bearer tokens work on `ssl.bing.com` | `BWT_OAUTH_API_HOST=ssl.bing.com bwt sites list` | Keep the default `www.bing.com` host |
-
-### Why shipping a client secret is acceptable here
-
-Bing's OAuth flow requires a client secret and documents no PKCE. Any secret inside a distributed binary
-can be extracted (RFC 8252 says such secrets must not be treated as confidential), and a loopback
-redirect identifies an address, not an app. The remaining risk is a malicious local process intercepting
-a code. `bwt` binds the callback port before opening the browser, so a process already holding the port
-makes the login abort instead of receiving a code; codes expire after 5 minutes; and anyone who wants no
-shared secret can use an API key or their own client. A server-side token broker that keeps the secret off
-user machines is the stronger design if the built-in client sees wide use.
+The key travels in the `apikey` query parameter, as Bing requires. `bwt` removes it from verbose logs, error
+messages, and transport errors.
 
 ## Troubleshooting
 
-| Symptom | Fix |
+| Message | Fix |
 | --- | --- |
-| `InvalidApiKey` right after creating a key | Wait about 30 minutes; new keys take time to activate |
-| `cannot listen on 127.0.0.1:47619` | Another login is running or another program holds the port; finish it or use `--with-api-key` |
-| `state mismatch` | Start the login again from the terminal; do not reuse an old browser tab |
-| `different OAuth client than this build provides` | You logged in with another build or client ID; run `bwt auth login` again |
-| `invalid_grant` | Access was revoked or expired; run `bwt auth login` |
-| `No OS keychain is available` | Use `--insecure-storage`, or `BWT_API_KEY` without saving |
-| `NotAuthorized` | Use the site URL exactly as `bwt sites list` prints it (scheme and trailing slash) |
+| `Bing did not accept this key, so nothing was saved` | Check the key; a new key can take about 30 minutes to activate. Retry later, or pass `--no-verify` to save it now |
+| `InvalidApiKey` | The key was regenerated or mistyped; run `bwt auth login` |
+| `No OS keychain is available` | Start a keychain service, pass `--insecure-storage`, or use `BWT_API_KEY` |
+| `OS keychain did not respond within 10s` | Unlock the keychain and retry |
+| `NotAuthorized` | Use the site URL exactly as `bwt sites list` prints it, and check that your account can access the site |

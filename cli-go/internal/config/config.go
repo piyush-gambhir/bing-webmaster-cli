@@ -1,6 +1,6 @@
-// Package config stores named profiles in an XDG YAML file. Secrets (OAuth
-// tokens, API keys, custom client secrets) live in the OS keychain, or in a
-// separate 0600 file only when the user chose --insecure-storage.
+// Package config stores named profiles in an XDG YAML file. API keys live in the
+// OS keychain, or in a separate 0600 file only when the user chose
+// --insecure-storage.
 package config
 
 import (
@@ -15,13 +15,7 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-const (
-	AuthOAuth  = "oauth"
-	AuthAPIKey = "api_key"
-
-	ClientBuiltin = "builtin"
-	ClientCustom  = "custom"
-)
+const AuthAPIKey = "api_key"
 
 // IndexNowKey is a site's IndexNow key. IndexNow keys are public by design
 // (hosted at https://host/KEY.txt), so they are kept in the config file.
@@ -31,17 +25,11 @@ type IndexNowKey struct {
 }
 
 type Profile struct {
-	// Auth is oauth or api_key; empty means the profile only holds IndexNow keys or a site.
-	Auth string `yaml:"auth,omitempty"`
-	// Client and ClientID record which OAuth client issued the tokens, so refresh
-	// always uses the same client.
-	Client       string                 `yaml:"client,omitempty"`
-	ClientID     string                 `yaml:"client_id,omitempty"`
-	RedirectPort int                    `yaml:"redirect_port,omitempty"`
-	Scope        string                 `yaml:"scope,omitempty"`
-	TokenStore   string                 `yaml:"token_store,omitempty"`
-	Site         string                 `yaml:"site,omitempty"`
-	IndexNow     map[string]IndexNowKey `yaml:"indexnow,omitempty"`
+	// Auth is api_key; empty means the profile only holds IndexNow keys or a site.
+	Auth       string                 `yaml:"auth,omitempty"`
+	TokenStore string                 `yaml:"token_store,omitempty"`
+	Site       string                 `yaml:"site,omitempty"`
+	IndexNow   map[string]IndexNowKey `yaml:"indexnow,omitempty"`
 }
 
 type Config struct {

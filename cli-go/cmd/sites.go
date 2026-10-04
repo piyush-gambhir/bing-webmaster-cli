@@ -75,7 +75,7 @@ func (a *app) siteVerifyCmd() *cobra.Command {
 			return err
 		}
 		if len(cl.Planned) > 0 {
-			return a.print(map[string]any{"dry_run": true, "requests": cl.Planned})
+			return a.printPlanned(cl.Planned)
 		}
 		return a.print(map[string]any{"site": args[0], "verified": result == true})
 	}

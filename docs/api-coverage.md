@@ -5,10 +5,10 @@ is out of date, when a documented method has no command, or when a command's rea
 classification disagrees with the registry.
 
 The registry is checked against the pinned documentation snapshot described in [compatibility.md](compatibility.md):
-62 methods, of which 50 are implemented, 9 are implemented as experimental, and 3 are never implemented.
+62 methods, of which 57 are implemented, 2 are implemented as experimental, and 3 are never implemented.
 
 Effect is behavior, not HTTP verb: `read` methods are allowed under `--read-only`; `write` methods are blocked.
-Experimental commands print a notice on every run because their current behavior is unverified.
+Experimental commands print a notice on every run: Bing still documents them, but they failed a live check.
 
 ## Sites
 
@@ -34,7 +34,7 @@ Experimental commands print a notice on every run because their current behavior
 | `SubmitUrl` | POST | write | implemented | `bwt submit urls` |  |
 | `SubmitUrlBatch` | POST | write | implemented | `bwt submit urls` | 500 URLs per request |
 | `GetUrlSubmissionQuota` | GET | read | implemented | `bwt quota`, `bwt submit urls` |  |
-| `SubmitContent` | POST | write | experimental | `bwt experimental submit-content` | docs conflict on whether OAuth is required; content can be indexed despite robots.txt |
+| `SubmitContent` | POST | write | implemented | `bwt submit content` | works with an API key (verified 2026-10-04); content can be indexed despite robots.txt |
 | `GetContentSubmissionQuota` | GET | read | implemented | `bwt quota` |  |
 
 ## Sitemaps and feeds
@@ -122,9 +122,9 @@ Experimental commands print a notice on every run because their current behavior
 
 | Method | HTTP | Effect | Status | Command | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `GetDeepLinkBlocks` | GET | read | experimental | `bwt experimental deeplink-blocks list` | current behavior unverified |
-| `AddDeepLinkBlock` | POST | write | experimental | `bwt experimental deeplink-blocks add` | current behavior unverified |
-| `RemoveDeepLinkBlock` | POST | write | experimental | `bwt experimental deeplink-blocks remove` | current behavior unverified |
+| `GetDeepLinkBlocks` | GET | read | implemented | `bwt deeplink-blocks list` | verified 2026-10-04 |
+| `AddDeepLinkBlock` | POST | write | implemented | `bwt deeplink-blocks add` | verified 2026-10-04; market must be lowercase (en-us) |
+| `RemoveDeepLinkBlock` | POST | write | implemented | `bwt deeplink-blocks remove` | verified 2026-10-04; market must be lowercase (en-us) |
 | `GetDeepLink` | GET | read | obsolete | Never implemented | marked Obsolete by Microsoft; use GetDeepLinkBlocks |
 | `GetDeepLinkAlgoUrls` | GET | read | obsolete | Never implemented | marked Obsolete by Microsoft; no longer used |
 | `UpdateDeepLink` | POST | write | obsolete | Never implemented | marked Obsolete by Microsoft; use deep-link blocking |
@@ -133,15 +133,15 @@ Experimental commands print a notice on every run because their current behavior
 
 | Method | HTTP | Effect | Status | Command | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `GetCountryRegionSettings` | GET | read | experimental | `bwt experimental geo list` | current behavior unverified |
-| `AddCountryRegionSettings` | POST | write | experimental | `bwt experimental geo add` | current behavior unverified |
-| `RemoveCountryRegionSettings` | POST | write | experimental | `bwt experimental geo remove` | current behavior unverified |
+| `GetCountryRegionSettings` | GET | read | implemented | `bwt geo list` | verified 2026-10-04 |
+| `AddCountryRegionSettings` | POST | write | implemented | `bwt geo add` | verified 2026-10-04; country code must be lowercase (us) |
+| `RemoveCountryRegionSettings` | POST | write | implemented | `bwt geo remove` | verified 2026-10-04; country code must be lowercase (us) |
 
 ## Site moves
 
 | Method | HTTP | Effect | Status | Command | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `GetSiteMoves` | GET | read | experimental | `bwt experimental site-move list` | community reports HTTP 404 |
+| `GetSiteMoves` | GET | read | experimental | `bwt experimental site-move list` | returned HTTP 404 in a live check (2026-10-04) |
 | `SubmitSiteMove` | POST | write | experimental | `bwt experimental site-move submit` | current behavior unverified |
 
 ## Fetch as Bingbot

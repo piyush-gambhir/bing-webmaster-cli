@@ -57,7 +57,7 @@ func APICoverageMarkdown(root *cobra.Command) string {
 		"%d methods, of which %d are implemented, %d are implemented as experimental, and %d are never implemented.\n\n",
 		len(registry.Ops), counts[registry.Implemented], counts[registry.Experimental], counts[registry.Obsolete])
 	b.WriteString("Effect is behavior, not HTTP verb: `read` methods are allowed under `--read-only`; `write` methods are blocked.\n")
-	b.WriteString("Experimental commands print a notice on every run because their current behavior is unverified.\n\n")
+	b.WriteString("Experimental commands print a notice on every run: Bing still documents them, but they failed a live check.\n\n")
 	var groups []string
 	seen := map[string]bool{}
 	for _, op := range registry.Ops {

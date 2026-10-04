@@ -21,9 +21,9 @@ func (a *app) urlCmd() *cobra.Command {
 	c := &cobra.Command{Use: "url", Short: "What Bing knows about a URL and the URLs under it",
 		Long: "Bing's URL data has no explicit indexed verdict. IsPage and HttpStatus describe crawling, not indexing."}
 	c.AddCommand(
-		a.opCmd(opSpec{use: "info URL", short: "Crawl details for one URL", op: "GetUrlInfo", args: []string{"url"},
+		a.opCmd(opSpec{use: "info URL", short: "Crawl details for one URL", op: "GetUrlInfo", args: []string{"url"}, domainOK: true,
 			long: "Shows last crawl, discovery date, HTTP status, size, anchors, and child count. A zero status or IsPage=false is not an indexing verdict."}),
-		a.opCmd(opSpec{use: "traffic URL", short: "Clicks and impressions for one URL (window undocumented)", op: "GetUrlTrafficInfo", args: []string{"url"}}),
+		a.opCmd(opSpec{use: "traffic URL", short: "Clicks and impressions for one URL (window undocumented)", op: "GetUrlTrafficInfo", args: []string{"url"}, domainOK: true}),
 		a.childrenCmd(),
 		a.childrenTrafficCmd(),
 	)
@@ -95,6 +95,9 @@ func (a *app) pagedOutput(site, method string, rows []map[string]any, fetched in
 	if !complete {
 		a.info("More pages may exist; use --all or a higher --page.")
 	}
+	if rows == nil {
+		rows = []map[string]any{}
+	}
 	envelope := map[string]any{"site": site, "method": method, "pages_fetched": fetched, "complete": complete, "row_count": len(rows), "rows": rows}
 	return output.View(a.out, a.format, envelope, rows, columns...)
 }
@@ -111,7 +114,7 @@ func (a *app) childrenCmd() *cobra.Command {
 	c.Flags().StringVar(&docFlags, "doc-flags", "", "Comma list: blocked-by-robots, malware")
 	c.Flags().StringVar(&httpCodes, "http", "", "Comma list: 2xx, 3xx, 301, 302, 4xx, 5xx, other")
 	c.RunE = func(cmd *cobra.Command, args []string) error {
-		if err := requireURL("URL", args[0]); err != nil {
+		if err := requireURLOrDomain("URL", args[0]); err != nil {
 			return err
 		}
 		if err := p.validate(65535); err != nil {
@@ -160,7 +163,7 @@ func (a *app) childrenTrafficCmd() *cobra.Command {
 	annotate(c, "GetChildrenUrlTrafficInfo")
 	p.flags(c)
 	c.RunE = func(cmd *cobra.Command, args []string) error {
-		if err := requireURL("URL", args[0]); err != nil {
+		if err := requireURLOrDomain("URL", args[0]); err != nil {
 			return err
 		}
 		if err := p.validate(65535); err != nil {
@@ -189,7 +192,7 @@ func (a *app) childrenTrafficCmd() *cobra.Command {
 // rowsOf converts a list result's dates (unless --raw) and returns its rows.
 func (a *app) rowsOf(v any) []map[string]any {
 	if !a.raw {
-		v = client.ConvertDates(v)
+		v = client.Clean(v)
 	}
 	return asList(v)
 }
@@ -257,7 +260,7 @@ func (a *app) linkPagesCmd(use, short, method, listField string, columns []outpu
 			m, _ := res.(map[string]any)
 			total, _ := stats.Num(m["TotalPages"])
 			if !a.raw {
-				return asList(client.ConvertDates(m[listField])), int(total), nil
+				return asList(client.Clean(m[listField])), int(total), nil
 			}
 			return asList(m[listField]), int(total), nil
 		})

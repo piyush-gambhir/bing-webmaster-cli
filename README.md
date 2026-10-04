@@ -32,8 +32,6 @@ make build            # bin/bwt
 make install          # $(go env GOPATH)/bin/bwt, or INSTALL_DIR=...
 ```
 
-Source builds have no built-in OAuth client unless `cli-go/.env.local` provides one (see
-[docs/auth.md](docs/auth.md)); API-key login always works.
 
 ### Verify a download
 
@@ -47,8 +45,7 @@ gh attestation verify bing-webmaster-cli_darwin_arm64.tar.gz --repo piyush-gambh
 ## Quick start
 
 ```bash
-bwt auth login                      # browser login; picks a default site
-bwt auth login --with-api-key       # or paste an API key (Settings > API Access > API Key)
+bwt auth login                      # opens Bing Webmaster Tools; paste your API key; picks a default site
 
 bwt sites list
 bwt stats traffic --since 2026-09-01
@@ -64,21 +61,22 @@ bwt quota
 
 | Group | Commands | Bing methods |
 | --- | --- | --- |
-| `auth`, `login`, `status`, `config` | login (browser or API key), status, list, use, logout | local, plus one `GetUserSites` check |
+| `auth`, `login`, `status`, `config` | login (API key), status, list, use, logout | local, plus one `GetUserSites` check |
 | `sites` | list, use, add, verify, remove | `GetUserSites`, `AddSite`, `VerifySite`, `RemoveSite` |
 | `stats` | traffic, queries, pages, query-pages, page-queries, detail, query-traffic, summary | the seven performance methods |
 | `crawl` | stats, issues, settings, set-settings | `GetCrawlStats`, `GetCrawlIssues`, `GetCrawlSettings`, `SaveCrawlSettings` |
 | `url` | info, traffic, children, children-traffic | URL information methods |
 | `links`, `connected-pages` | counts, list; list, add | link and connected-page methods |
 | `sitemaps` | list, get, submit, remove | feed methods |
-| `submit`, `quota` | urls; URL and content quota | `SubmitUrl`, `SubmitUrlBatch`, quota methods |
+| `submit`, `quota` | urls, content; URL and content quota | `SubmitUrl`, `SubmitUrlBatch`, `SubmitContent`, quota methods |
 | `indexnow` | key generate, key check, submit | IndexNow protocol (no Bing login needed) |
 | `keywords` | get, stats, related | keyword research |
 | `fetch` | request, list, get | Fetch as Bingbot |
 | `users` | list, add, remove | site roles |
 | `params`, `block`, `preview-blocks` | list, add, remove (and enable/disable) | URL normalization, blocked URLs, preview blocks |
-| `experimental` | geo, site-move, deeplink-blocks, submit-content | documented methods with unverified current behavior |
-| `api`, `doctor`, `update`, `completion`, `version` | raw method call, checks, self-update | |
+| `geo`, `deeplink-blocks` | list, add, remove | country or region targeting, deep-link blocks |
+| `experimental` | site-move | documented, but returned HTTP 404 in a live check |
+| `api`, `doctor`, `update`, `completion`, `version` | raw method call, `api methods` (the method registry as data), checks, self-update | |
 
 The [command reference](docs/commands.md) is generated from the command tree. The
 [API coverage map](docs/api-coverage.md) lists every Bing method with its command, HTTP verb, read/write
@@ -86,10 +84,11 @@ effect, and status, plus what is out of scope and why.
 
 ## Authentication
 
-See [docs/auth.md](docs/auth.md) for every method. In short: `bwt auth login` uses your browser and the
-built-in OAuth client; `bwt auth login --with-api-key` saves an API key; `BWT_API_KEY` or
-`BWT_ACCESS_TOKEN` work without saving anything. Secrets live in the OS keychain; a plaintext 0600 file is
-used only with an explicit `--insecure-storage`.
+See [docs/auth.md](docs/auth.md). In short: `bwt auth login` opens Bing Webmaster Tools, takes your API key
+(Settings > API Access > API Key) at a hidden prompt, checks it, and saves it in the OS keychain; one key
+covers all your sites. `BWT_API_KEY` works without saving anything. A plaintext 0600 file is used only with
+an explicit `--insecure-storage`. There is no browser OAuth login: Bing's OAuth registration rejects the
+loopback redirect a CLI needs.
 
 | Variable | Meaning |
 | --- | --- |
@@ -97,7 +96,6 @@ used only with an explicit `--insecure-storage`.
 | `BWT_ACCESS_TOKEN` | Bearer token; overrides everything else |
 | `BWT_PROFILE`, `BWT_SITE` | Default profile and site |
 | `BWT_CONFIG` | Config file path (default `~/.config/bing-webmaster-cli/config.yaml`, XDG-aware) |
-| `BWT_CLIENT_ID`, `BWT_CLIENT_SECRET` | Override the built-in OAuth client |
 | `BWT_INDEXNOW_KEY` | IndexNow key for submissions |
 | `BWT_NO_INPUT`, `BWT_QUIET`, `BWT_VERBOSE`, `BWT_READ_ONLY` | Behavior switches (`1` or `true`) |
 
@@ -122,7 +120,10 @@ ambiguous match is an error.
 ## Output and safety
 
 `-o table` (default), `json`, `yaml`, or `csv`. Data goes to stdout, diagnostics to stderr, and errors in
-JSON/YAML modes are structured (`method`, `http_status`, `api_error_code`, `api_error_name`).
+JSON/YAML modes are structured (`method`, `http_status`, `api_error_code`, `api_error_name`). JSON keeps
+Bing's field names, converts dates to RFC 3339, and drops Bing's `__type` metadata; `--raw` prints the wire
+response. `bwt api methods -o json` lists every Bing method with its read/write effect and command, so agents
+can discover capabilities without reading docs.
 
 - `--read-only` blocks every command that changes Bing state, local credentials, or the binary. Effects come
   from a registry of all 62 methods, so reads over POST (`url children`) still work.

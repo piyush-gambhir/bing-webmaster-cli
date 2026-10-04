@@ -57,7 +57,7 @@ func newRoot(a *app) *cobra.Command {
 				return fmt.Errorf("%s changes local state and is blocked by --read-only", cmd.CommandPath())
 			}
 			if cmd.Annotations["experimental"] == "true" {
-				a.info("Experimental: Bing documents this method but its current behavior is unverified. Check the result in the Bing Webmaster Tools dashboard.")
+				a.info("Experimental: Bing documents this method, but it failed a live check (HTTP 404 on 2026-10-04). Check the result in the Bing Webmaster Tools dashboard.")
 			}
 			return nil
 		},
@@ -83,7 +83,7 @@ func newRoot(a *app) *cobra.Command {
 	root.AddCommand(a.authCmd(), a.configCmd(), a.sitesCmd(), a.statsCmd(), a.crawlCmd(), a.urlCmd(),
 		a.linksCmd(), a.connectedPagesCmd(), a.sitemapsCmd(), a.submitCmd(), a.quotaCmd(), a.indexnowCmd(),
 		a.keywordsCmd(), a.fetchCmd(), a.usersCmd(), a.paramsCmd(), a.blockCmd(), a.previewBlocksCmd(),
-		a.experimentalCmd(), a.apiCmd(), a.doctorCmd(), a.updateCmd())
+		a.geoCmd(), a.deepLinkBlocksCmd(), a.experimentalCmd(), a.apiCmd(), a.doctorCmd(), a.updateCmd())
 	login := a.loginCmd()
 	login.Short = "Alias for auth login"
 	root.AddCommand(login)
@@ -123,7 +123,7 @@ func execute(ctx context.Context, a *app, args []string) int {
 	root.SetArgs(args)
 	if err := root.ExecuteContext(ctx); err != nil {
 		message := err.Error()
-		for _, secret := range []string{a.apiKey, a.accessToken, os.Getenv("BWT_API_KEY"), os.Getenv("BWT_ACCESS_TOKEN"), os.Getenv("BWT_CLIENT_SECRET")} {
+		for _, secret := range []string{a.apiKey, a.accessToken, os.Getenv("BWT_API_KEY"), os.Getenv("BWT_ACCESS_TOKEN")} {
 			if len(secret) >= 4 {
 				message = strings.ReplaceAll(message, secret, "[REDACTED]")
 			}

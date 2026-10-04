@@ -25,6 +25,8 @@ type opSpec struct {
 	setup   func(*cobra.Command) func() (map[string]any, error)
 	// validate checks positional arguments before any network call.
 	validate func([]string) error
+	// domainOK also accepts Bing's documented domain:example.com form for "url".
+	domainOK bool
 }
 
 // annotate records the Bing methods a command calls; mutates and experimental
@@ -75,7 +77,11 @@ func (a *app) opCmd(s opSpec) *cobra.Command {
 		params := map[string]any{}
 		for i, name := range s.args {
 			if urlParams[name] {
-				if err := requireURL(strings.ToUpper(name), args[i]); err != nil {
+				check := requireURL
+				if s.domainOK && name == "url" {
+					check = requireURLOrDomain
+				}
+				if err := check(strings.ToUpper(name), args[i]); err != nil {
 					return err
 				}
 			}
@@ -125,7 +131,7 @@ func (a *app) opCmd(s opSpec) *cobra.Command {
 // acknowledgement for writes, and date-converted data for reads.
 func (a *app) emit(cl *client.Client, method string, params map[string]any, result any, cols []output.Col) error {
 	if len(cl.Planned) > 0 {
-		return a.print(map[string]any{"dry_run": true, "requests": cl.Planned})
+		return a.printPlanned(cl.Planned)
 	}
 	op, _ := registry.Lookup(method)
 	if op.Effect == registry.Write {
@@ -139,9 +145,25 @@ func (a *app) emit(cl *client.Client, method string, params map[string]any, resu
 		return a.print(ack)
 	}
 	if !a.raw {
-		result = client.ConvertDates(result)
+		result = client.Clean(result)
+	}
+	// A single object with chosen columns is a one-row table, so tables never
+	// dump every field (fetch get would otherwise print the whole document).
+	if m, ok := result.(map[string]any); ok && len(cols) > 0 {
+		return output.View(a.out, a.format, m, []map[string]any{m}, cols...)
 	}
 	return a.print(result, cols...)
+}
+
+// printPlanned shows --dry-run requests: one row per request in tables, the
+// full requests (with bodies) in JSON and YAML.
+func (a *app) printPlanned(planned []client.Planned) error {
+	rows := make([]map[string]any, 0, len(planned))
+	for _, p := range planned {
+		rows = append(rows, map[string]any{"method": p.Method, "http": p.HTTP, "url": p.URL})
+	}
+	a.info("Dry run: nothing was sent. Use -o json to see the request bodies.")
+	return output.View(a.out, a.format, map[string]any{"dry_run": true, "requests": planned}, rows, cols("method", "method", "http", "http", "url", "url")...)
 }
 
 // urlParams are positional parameters that must be absolute URLs. "page" is a
@@ -157,6 +179,18 @@ func cols(pairs ...string) []output.Col {
 		out = append(out, col(pairs[i], pairs[i+1]))
 	}
 	return out
+}
+
+// requireURLOrDomain accepts an absolute URL or domain:example.com, the form
+// Bing documents for its URL information methods.
+func requireURLOrDomain(name, raw string) error {
+	if host, ok := strings.CutPrefix(raw, "domain:"); ok {
+		if host == "" || strings.ContainsAny(host, "/:?# ") || !strings.Contains(host, ".") {
+			return fmt.Errorf("%s must be domain:example.com or an absolute http(s) URL, got %q", name, raw)
+		}
+		return nil
+	}
+	return requireURL(name, raw)
 }
 
 func requireURL(name, raw string) error {

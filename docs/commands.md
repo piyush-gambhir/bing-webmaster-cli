@@ -58,6 +58,18 @@ bwt api METHOD [flags]
       --param stringArray   Parameter as name=value (repeatable)
 ```
 
+## bwt api methods
+
+List every Bing method: HTTP verb, read/write effect, status, and the command that calls it
+
+```text
+bwt api methods
+```
+
+```bash
+  bwt api methods -o json
+```
+
 ## bwt auth
 
 Log in, inspect credentials, and manage profiles
@@ -76,12 +88,14 @@ bwt auth list
 
 ## bwt auth login
 
-Log in with your browser (or an API key) and pick a default site
+Save your Bing Webmaster API key and pick a default site
 
-Opens Bing's consent page in your browser using the built-in OAuth client, saves the login in the OS
-keychain, and sets a default site. --with-api-key saves an API key instead (Bing Webmaster Tools >
-Settings > API Access > API Key), read from a hidden prompt or from stdin when piped.
-Without an OS keychain, login stops unless you pass --insecure-storage (a 0600 plaintext file).
+Logs in with your Bing Webmaster Tools API key, which covers every site in your account. In a terminal it
+opens Bing Webmaster Tools, shows where the key is (Settings > API Access > API Key), and reads it from a
+hidden prompt; piped input is read from stdin. The key is checked with one GetUserSites call before anything
+is saved, then stored in the OS keychain, and a default site is chosen. Without an OS keychain, login stops
+unless you pass --insecure-storage (a 0600 plaintext file). Bing's OAuth registration rejects loopback
+redirect URIs, so there is no browser OAuth login.
 
 changes local configuration.
 
@@ -91,26 +105,21 @@ bwt auth login [flags]
 
 ```bash
   bwt auth login
-  bwt auth login --with-api-key
-  printf '%s' "$KEY" | bwt auth login --with-api-key --no-input --profile ci
-  bwt auth login --client-id ID --client-secret-stdin --redirect-port 8400 < secret.txt
+  bwt auth login --profile client-b
+  printf '%s' "$KEY" | bwt auth login --no-input --profile ci
+  BWT_API_KEY=... bwt sites list    # use a key without saving it
 ```
 
 ```text
-      --client-id string      Use your own OAuth client instead of the built-in one
-      --client-secret-stdin   Read your OAuth client secret from stdin (with --client-id)
-      --insecure-storage      Store secrets in a 0600 plaintext file instead of the OS keychain
-      --no-verify             Skip the GetUserSites check after saving
-      --redirect-port int     Loopback port registered with your own client (with --client-id)
-      --scope string          OAuth scope: manage (read and write) or read (default "manage")
-      --with-api-key          Save an API key instead of using the browser
+      --insecure-storage   Store the key in a 0600 plaintext file instead of the OS keychain
+      --no-verify          Save without checking the key with Bing (for a key that is not active yet)
 ```
 
 ## bwt auth logout
 
-Delete the profile's saved credentials (keeps its site and IndexNow keys)
+Delete the profile's saved API key (keeps its site and IndexNow keys)
 
-Deletes the saved OAuth login or API key from the keychain or secrets file. Bing has no token revocation endpoint. To revoke access, remove the app or regenerate the API key under Bing Webmaster Tools > Settings > API Access.
+Deletes the saved API key from the keychain or secrets file. Logging out removes the key from this machine only. To invalidate it, regenerate it in Bing Webmaster Tools > Settings > API Access.
 
 changes local configuration.
 
@@ -334,6 +343,56 @@ Bing methods: GetCrawlStats.
 bwt crawl stats
 ```
 
+## bwt deeplink-blocks
+
+Block deep links (sitelinks) shown under a result
+
+```text
+bwt deeplink-blocks
+```
+
+## bwt deeplink-blocks add
+
+Block a deep link
+
+changes Bing state (blocked by --read-only); Bing methods: AddDeepLinkBlock.
+
+```text
+bwt deeplink-blocks add [flags]
+```
+
+```text
+      --deep-link-url string   Deep link URL to block (required)
+      --market string          Market, such as en-US (required)
+      --search-url string      Result URL the deep link appears under (required)
+```
+
+## bwt deeplink-blocks list
+
+List deep-link blocks
+
+Bing methods: GetDeepLinkBlocks.
+
+```text
+bwt deeplink-blocks list
+```
+
+## bwt deeplink-blocks remove
+
+Remove a deep-link block
+
+changes Bing state (blocked by --read-only); Bing methods: RemoveDeepLinkBlock.
+
+```text
+bwt deeplink-blocks remove [flags]
+```
+
+```text
+      --deep-link-url string   Deep link URL to block (required)
+      --market string          Market, such as en-US (required)
+      --search-url string      Result URL the deep link appears under (required)
+```
+
 ## bwt doctor
 
 Check configuration, credentials, site selection, and PATH
@@ -350,113 +409,13 @@ bwt doctor [flags]
 
 ## bwt experimental
 
-Documented Bing methods whose current behavior is unverified
+Documented Bing methods that did not work in live checks
 
-These methods are still in Bing's documentation, but there is no current evidence that they work.
-Each run prints a notice. Confirm results in the Bing Webmaster Tools dashboard.
+These methods are still in Bing's documentation, but a live check on 2026-10-04 failed (GetSiteMoves
+returned HTTP 404). Each run prints a notice. Confirm results in the Bing Webmaster Tools dashboard.
 
 ```text
 bwt experimental
-```
-
-## bwt experimental deeplink-blocks
-
-Block deep links (sitelinks) shown under a result
-
-```text
-bwt experimental deeplink-blocks
-```
-
-## bwt experimental deeplink-blocks add
-
-Block a deep link
-
-changes Bing state (blocked by --read-only); experimental; Bing methods: AddDeepLinkBlock.
-
-```text
-bwt experimental deeplink-blocks add [flags]
-```
-
-```text
-      --deep-link-url string   Deep link URL to block (required)
-      --market string          Market, such as en-US (required)
-      --search-url string      Result URL the deep link appears under (required)
-```
-
-## bwt experimental deeplink-blocks list
-
-List deep-link blocks
-
-experimental; Bing methods: GetDeepLinkBlocks.
-
-```text
-bwt experimental deeplink-blocks list
-```
-
-## bwt experimental deeplink-blocks remove
-
-Remove a deep-link block
-
-changes Bing state (blocked by --read-only); experimental; Bing methods: RemoveDeepLinkBlock.
-
-```text
-bwt experimental deeplink-blocks remove [flags]
-```
-
-```text
-      --deep-link-url string   Deep link URL to block (required)
-      --market string          Market, such as en-US (required)
-      --search-url string      Result URL the deep link appears under (required)
-```
-
-## bwt experimental geo
-
-Country or region targeting for pages, directories, or hosts
-
-```text
-bwt experimental geo
-```
-
-## bwt experimental geo add
-
-Target a URL to a country or region
-
-changes Bing state (blocked by --read-only); experimental; Bing methods: AddCountryRegionSettings.
-
-```text
-bwt experimental geo add [flags]
-```
-
-```text
-      --country string   Two-letter ISO country code (required)
-      --type string      page, directory, domain, or subdomain (default "page")
-      --url string       Page, directory, or host URL (required)
-```
-
-## bwt experimental geo list
-
-List targeting settings
-
-experimental; Bing methods: GetCountryRegionSettings.
-
-```text
-bwt experimental geo list
-```
-
-## bwt experimental geo remove
-
-Remove a targeting setting
-
-changes Bing state (blocked by --read-only); experimental; Bing methods: RemoveCountryRegionSettings.
-
-```text
-bwt experimental geo remove [flags]
-```
-
-```text
-      --country string   Two-letter ISO country code (required)
-      --type string      page, directory, domain, or subdomain (default "page")
-      --url string       Page, directory, or host URL (required)
 ```
 
 ## bwt experimental site-move
@@ -492,26 +451,6 @@ bwt experimental site-move submit [flags]
       --scope string   domain, host, or directory (required)
       --to string      Target URL (required)
       --type string    local or global (required)
-```
-
-## bwt experimental submit-content
-
-Push a page's full HTTP response to Bing (content submission)
-
-Sends a complete HTTP response (status line, headers, blank line, body) for URL, base64-encoded, up to 10 MB.
-Bing's docs conflict on whether this needs OAuth, and submitted content may be indexed even if robots.txt
-disallows it (NOINDEX is honored).
-
-changes Bing state (blocked by --read-only); experimental; Bing methods: SubmitContent.
-
-```text
-bwt experimental submit-content URL [flags]
-```
-
-```text
-      --dynamic-serving string   none, pc, mobile, amp, tablet, or nonvisual (default "none")
-      --file string              File with the full HTTP response (required)
-      --structured-data string   File with structured data, normally JSON-LD
 ```
 
 ## bwt fetch
@@ -554,6 +493,56 @@ changes Bing state (blocked by --read-only); Bing methods: FetchUrl.
 
 ```text
 bwt fetch request URL
+```
+
+## bwt geo
+
+Country or region targeting for pages, directories, or hosts
+
+```text
+bwt geo
+```
+
+## bwt geo add
+
+Target a URL to a country or region
+
+changes Bing state (blocked by --read-only); Bing methods: AddCountryRegionSettings.
+
+```text
+bwt geo add [flags]
+```
+
+```text
+      --country string   Two-letter ISO country code (required)
+      --type string      page, directory, domain, or subdomain (default "page")
+      --url string       Page, directory, or host URL (required)
+```
+
+## bwt geo list
+
+List targeting settings
+
+Bing methods: GetCountryRegionSettings.
+
+```text
+bwt geo list
+```
+
+## bwt geo remove
+
+Remove a targeting setting
+
+changes Bing state (blocked by --read-only); Bing methods: RemoveCountryRegionSettings.
+
+```text
+bwt geo remove [flags]
+```
+
+```text
+      --country string   Two-letter ISO country code (required)
+      --type string      page, directory, domain, or subdomain (default "page")
+      --url string       Page, directory, or host URL (required)
 ```
 
 ## bwt indexnow
@@ -747,10 +736,12 @@ bwt links list URL [flags]
 
 Alias for auth login
 
-Opens Bing's consent page in your browser using the built-in OAuth client, saves the login in the OS
-keychain, and sets a default site. --with-api-key saves an API key instead (Bing Webmaster Tools >
-Settings > API Access > API Key), read from a hidden prompt or from stdin when piped.
-Without an OS keychain, login stops unless you pass --insecure-storage (a 0600 plaintext file).
+Logs in with your Bing Webmaster Tools API key, which covers every site in your account. In a terminal it
+opens Bing Webmaster Tools, shows where the key is (Settings > API Access > API Key), and reads it from a
+hidden prompt; piped input is read from stdin. The key is checked with one GetUserSites call before anything
+is saved, then stored in the OS keychain, and a default site is chosen. Without an OS keychain, login stops
+unless you pass --insecure-storage (a 0600 plaintext file). Bing's OAuth registration rejects loopback
+redirect URIs, so there is no browser OAuth login.
 
 changes local configuration.
 
@@ -760,19 +751,14 @@ bwt login [flags]
 
 ```bash
   bwt auth login
-  bwt auth login --with-api-key
-  printf '%s' "$KEY" | bwt auth login --with-api-key --no-input --profile ci
-  bwt auth login --client-id ID --client-secret-stdin --redirect-port 8400 < secret.txt
+  bwt auth login --profile client-b
+  printf '%s' "$KEY" | bwt auth login --no-input --profile ci
+  BWT_API_KEY=... bwt sites list    # use a key without saving it
 ```
 
 ```text
-      --client-id string      Use your own OAuth client instead of the built-in one
-      --client-secret-stdin   Read your OAuth client secret from stdin (with --client-id)
-      --insecure-storage      Store secrets in a 0600 plaintext file instead of the OS keychain
-      --no-verify             Skip the GetUserSites check after saving
-      --redirect-port int     Loopback port registered with your own client (with --client-id)
-      --scope string          OAuth scope: manage (read and write) or read (default "manage")
-      --with-api-key          Save an API key instead of using the browser
+      --insecure-storage   Store the key in a 0600 plaintext file instead of the OS keychain
+      --no-verify          Save without checking the key with Bing (for a key that is not active yet)
 ```
 
 ## bwt params
@@ -1220,6 +1206,31 @@ Submit URLs to Bing (prefer indexnow submit for new or changed URLs)
 
 ```text
 bwt submit
+```
+
+## bwt submit content
+
+Push a page's full HTTP response to Bing (content submission)
+
+Sends a complete HTTP response (status line, headers, blank line, body) for URL, base64-encoded, up to 10 MB.
+Works with an API key. Submitted content may be indexed even if robots.txt disallows it (NOINDEX is
+honored). Capture a response with: curl -s --http1.1 -i https://example.com/page -o page.http
+
+changes Bing state (blocked by --read-only); Bing methods: SubmitContent.
+
+```text
+bwt submit content URL [flags]
+```
+
+```bash
+  curl -s --http1.1 -i https://www.example.com/ -o home.http
+  bwt submit content https://www.example.com/ --file home.http
+```
+
+```text
+      --dynamic-serving string   none, pc, mobile, amp, tablet, or nonvisual (default "none")
+      --file string              File with the full HTTP response (required)
+      --structured-data string   File with structured data, normally JSON-LD
 ```
 
 ## bwt submit urls

@@ -15,7 +15,9 @@ var ErrorNames = map[int]string{
 }
 
 var hints = map[int]string{
-	3:  "the API key is invalid; a newly generated key can take about 30 minutes to start working (check BWT_API_KEY or run bwt auth login --with-api-key)",
+	1:  "Bing reported an internal error; try again later",
+	2:  "Bing gave no detail; for URL and link methods this usually means Bing has no data for that URL yet (a new or uncrawled site)",
+	3:  "the API key is invalid; a newly generated key can take about 30 minutes to start working (check BWT_API_KEY or run bwt auth login)",
 	4:  "Bing is throttling this user; wait before trying again (no automatic retry was attempted)",
 	5:  "Bing is throttling this host; wait before trying again (no automatic retry was attempted)",
 	6:  "Bing reports this user as blocked",

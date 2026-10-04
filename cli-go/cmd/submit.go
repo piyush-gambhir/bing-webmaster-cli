@@ -133,7 +133,7 @@ func (a *app) submitCmd() *cobra.Command {
 			batches = append(batches, entry)
 		}
 		if len(cl.Planned) > 0 {
-			return a.print(map[string]any{"dry_run": true, "requests": cl.Planned})
+			return a.printPlanned(cl.Planned)
 		}
 		report["accepted"] = accepted
 		report["batches"] = batches
@@ -146,7 +146,7 @@ func (a *app) submitCmd() *cobra.Command {
 		}
 		return output.View(a.out, a.format, report, batches, cols("batch", "batch", "count", "count", "status", "status")...)
 	}
-	c.AddCommand(urls)
+	c.AddCommand(urls, a.submitContentCmd())
 	return c
 }
 
@@ -206,5 +206,5 @@ func (a *app) convert(v any) any {
 	if a.raw {
 		return v
 	}
-	return client.ConvertDates(v)
+	return client.Clean(v)
 }

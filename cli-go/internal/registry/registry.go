@@ -57,7 +57,7 @@ var Ops = []Op{
 	{Name: "SubmitUrl", HTTP: "POST", Params: []Param{site, p("url", "string")}, Returns: "void", Effect: Write, Status: Implemented, Group: "URL and content submission"},
 	{Name: "SubmitUrlBatch", HTTP: "POST", Params: []Param{site, p("urlList", "string[]")}, Returns: "void", Effect: Write, Status: Implemented, Group: "URL and content submission", Note: "500 URLs per request"},
 	{Name: "GetUrlSubmissionQuota", HTTP: "GET", Params: []Param{site}, Returns: "UrlSubmissionQuota", Effect: Read, Status: Implemented, Group: "URL and content submission"},
-	{Name: "SubmitContent", HTTP: "POST", Params: []Param{site, p("url", "string"), p("httpMessage", "string"), p("structuredData", "string"), p("dynamicServing", "int32")}, Returns: "void", Effect: Write, Status: Experimental, Group: "URL and content submission", Note: "docs conflict on whether OAuth is required; content can be indexed despite robots.txt"},
+	{Name: "SubmitContent", HTTP: "POST", Params: []Param{site, p("url", "string"), p("httpMessage", "string"), p("structuredData", "string"), p("dynamicServing", "int32")}, Returns: "void", Effect: Write, Status: Implemented, Group: "URL and content submission", Note: "works with an API key (verified 2026-10-04); content can be indexed despite robots.txt"},
 	{Name: "GetContentSubmissionQuota", HTTP: "GET", Params: []Param{site}, Returns: "ContentSubmissionQuota", Effect: Read, Status: Implemented, Group: "URL and content submission"},
 
 	{Name: "GetFeeds", HTTP: "GET", Params: []Param{site}, Returns: "Feed[]", Effect: Read, Status: Implemented, Group: "Sitemaps and feeds"},
@@ -105,18 +105,18 @@ var Ops = []Op{
 	{Name: "AddPagePreviewBlock", HTTP: "POST", Params: []Param{site, p("url", "string"), p("reason", "BlockReason")}, Returns: "void", Effect: Write, Status: Implemented, Group: "Page preview blocks"},
 	{Name: "RemovePagePreviewBlock", HTTP: "POST", Params: []Param{site, p("url", "string")}, Returns: "void", Effect: Write, Status: Implemented, Group: "Page preview blocks"},
 
-	{Name: "GetDeepLinkBlocks", HTTP: "GET", Params: []Param{site}, Returns: "DeepLinkBlock[]", Effect: Read, Status: Experimental, Group: "Deep links", Note: "current behavior unverified"},
-	{Name: "AddDeepLinkBlock", HTTP: "POST", Params: []Param{site, p("market", "string"), p("searchUrl", "string"), p("deepLinkUrl", "string")}, Returns: "void", Effect: Write, Status: Experimental, Group: "Deep links", Note: "current behavior unverified"},
-	{Name: "RemoveDeepLinkBlock", HTTP: "POST", Params: []Param{site, p("market", "string"), p("searchUrl", "string"), p("deepLinkUrl", "string")}, Returns: "void", Effect: Write, Status: Experimental, Group: "Deep links", Note: "current behavior unverified"},
+	{Name: "GetDeepLinkBlocks", HTTP: "GET", Params: []Param{site}, Returns: "DeepLinkBlock[]", Effect: Read, Status: Implemented, Group: "Deep links", Note: "verified 2026-10-04"},
+	{Name: "AddDeepLinkBlock", HTTP: "POST", Params: []Param{site, p("market", "string"), p("searchUrl", "string"), p("deepLinkUrl", "string")}, Returns: "void", Effect: Write, Status: Implemented, Group: "Deep links", Note: "verified 2026-10-04; market must be lowercase (en-us)"},
+	{Name: "RemoveDeepLinkBlock", HTTP: "POST", Params: []Param{site, p("market", "string"), p("searchUrl", "string"), p("deepLinkUrl", "string")}, Returns: "void", Effect: Write, Status: Implemented, Group: "Deep links", Note: "verified 2026-10-04; market must be lowercase (en-us)"},
 	{Name: "GetDeepLink", HTTP: "GET", Params: []Param{site, p("url", "string")}, Returns: "DeepLink[]", Effect: Read, Status: Obsolete, Group: "Deep links", Note: "marked Obsolete by Microsoft; use GetDeepLinkBlocks"},
 	{Name: "GetDeepLinkAlgoUrls", HTTP: "GET", Params: []Param{site}, Returns: "DeepLinkAlgoUrl[]", Effect: Read, Status: Obsolete, Group: "Deep links", Note: "marked Obsolete by Microsoft; no longer used"},
 	{Name: "UpdateDeepLink", HTTP: "POST", Params: []Param{site, p("algoUrl", "string"), p("deepLink", "string"), p("weight", "DeepLinkWeight")}, Returns: "void", Effect: Write, Status: Obsolete, Group: "Deep links", Note: "marked Obsolete by Microsoft; use deep-link blocking"},
 
-	{Name: "GetCountryRegionSettings", HTTP: "GET", Params: []Param{site}, Returns: "CountryRegionSettings[]", Effect: Read, Status: Experimental, Group: "Geo-targeting", Note: "current behavior unverified"},
-	{Name: "AddCountryRegionSettings", HTTP: "POST", Params: []Param{site, p("settings", "CountryRegionSettings")}, Returns: "void", Effect: Write, Status: Experimental, Group: "Geo-targeting", Note: "current behavior unverified"},
-	{Name: "RemoveCountryRegionSettings", HTTP: "POST", Params: []Param{site, p("settings", "CountryRegionSettings")}, Returns: "void", Effect: Write, Status: Experimental, Group: "Geo-targeting", Note: "current behavior unverified"},
+	{Name: "GetCountryRegionSettings", HTTP: "GET", Params: []Param{site}, Returns: "CountryRegionSettings[]", Effect: Read, Status: Implemented, Group: "Geo-targeting", Note: "verified 2026-10-04"},
+	{Name: "AddCountryRegionSettings", HTTP: "POST", Params: []Param{site, p("settings", "CountryRegionSettings")}, Returns: "void", Effect: Write, Status: Implemented, Group: "Geo-targeting", Note: "verified 2026-10-04; country code must be lowercase (us)"},
+	{Name: "RemoveCountryRegionSettings", HTTP: "POST", Params: []Param{site, p("settings", "CountryRegionSettings")}, Returns: "void", Effect: Write, Status: Implemented, Group: "Geo-targeting", Note: "verified 2026-10-04; country code must be lowercase (us)"},
 
-	{Name: "GetSiteMoves", HTTP: "GET", Params: []Param{site}, Returns: "SiteMoveSettings[]", Effect: Read, Status: Experimental, Group: "Site moves", Note: "community reports HTTP 404"},
+	{Name: "GetSiteMoves", HTTP: "GET", Params: []Param{site}, Returns: "SiteMoveSettings[]", Effect: Read, Status: Experimental, Group: "Site moves", Note: "returned HTTP 404 in a live check (2026-10-04)"},
 	{Name: "SubmitSiteMove", HTTP: "POST", Params: []Param{site, p("settings", "SiteMoveSettings")}, Returns: "void", Effect: Write, Status: Experimental, Group: "Site moves", Note: "current behavior unverified"},
 
 	{Name: "FetchUrl", HTTP: "POST", Params: []Param{site, p("url", "string")}, Returns: "void", Effect: Write, Status: Implemented, Group: "Fetch as Bingbot", Note: "schedules a Bingbot fetch"},

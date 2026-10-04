@@ -71,7 +71,12 @@ func CheckKey(ctx context.Context, h *http.Client, keyLocation, key string) erro
 	}
 	defer res.Body.Close()
 	if res.StatusCode >= 300 && res.StatusCode < 400 {
-		return fmt.Errorf("%s redirects to %s (HTTP %d); host the key file at the exact location", keyLocation, res.Header.Get("Location"), res.StatusCode)
+		loc := res.Header.Get("Location")
+		msg := fmt.Sprintf("%s redirects to %s (HTTP %d); host the key file at the exact location", keyLocation, loc, res.StatusCode)
+		if u, err := url.Parse(loc); err == nil && u.Host != "" {
+			msg += fmt.Sprintf(". If your pages are served from %s, use --host %s so the key and the submitted URLs share a host", u.Host, u.Host)
+		}
+		return errors.New(msg)
 	}
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("%s returned HTTP %d; upload a text file containing only the key", keyLocation, res.StatusCode)

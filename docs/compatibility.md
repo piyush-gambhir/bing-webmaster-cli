@@ -45,26 +45,32 @@ The JSON endpoint is `https://ssl.bing.com/webmaster/api.svc/json/METHOD`. The p
 | `cmd` `TestCompatibilityRecordsSnapshotHash` | This page records the sha256 of the vendored snapshot |
 | `cmd` `TestAgentSafetyCommandManifest` | Adding or reclassifying any command needs a deliberate digest update |
 
-## Behaviors the documentation does not settle
+## Live checks (2026-10-04)
 
-No authenticated calls were made while building the CLI. These items need a live check with a real
-account; until then the CLI takes the conservative behavior shown.
+Checked end to end against a real account (one verified site with little traffic) using an API key. Reads ran
+under `--read-only`; writes were limited to reversible ones on a nonexistent test page or a throwaway test site,
+and every change was undone. Commands with outside effects (`users add`, `users remove`, `connected-pages add`,
+`sitemaps remove`, `experimental site-move submit`) were checked with `--dry-run` only.
 
-| Question | Current behavior |
+| Area | Result |
 | --- | --- |
-| Does Bing accept `http://127.0.0.1:47619/callback` as an OAuth redirect? | Built-in browser login uses it. If Bing rejects it, browser login is disabled and `--with-api-key` is the login path |
-| Does Bing echo `state`? | Required. A missing or wrong `state` fails the login (no login CSRF exposure) |
-| Does Bing enforce PKCE? | The CLI sends S256 PKCE parameters; harmless if ignored |
-| Do bearer tokens work on `ssl.bing.com`? | OAuth calls use `www.bing.com`, as Bing's OAuth guide does. `BWT_OAUTH_API_HOST=ssl.bing.com` switches hosts for testing |
-| Refresh `grant_type` | Bing's table says `authorization_code`, its sample says `refresh_token`. The CLI sends the standard `refresh_token` |
-| Scale of `AvgClickPosition` and `AvgImpressionPosition` | Shown raw; some community tools divide by 10 |
-| Whether performance `Date` values mark days or week buckets | Shown as returned, never interpolated |
-| `DateTime` syntax for keyword GET parameters | `YYYY-MM-DD` |
-| Submission quota rules | Printed exactly as returned; nothing hard-coded |
-| `SubmitContent` authentication (OAuth only, or API key too) | `bwt experimental submit-content` |
-| `BlockReason` enum values | `--reason` takes the number |
-| Geo-targeting, site moves, deep-link blocks | `bwt experimental` with a notice on every run |
-| `CrawlRate` valid range and hour timezone | Accepts 0 to 255 per hour; documented as unknown |
+| Login | API key verified with `GetUserSites`, saved in the macOS Keychain, default site chosen |
+| Browser OAuth | Not possible: Bing's OAuth client registration rejects `http://127.0.0.1:47619/callback` and `http://localhost:47619/callback` ("not a valid http or https url"), so the CLI has no OAuth login |
+| Sites | `sites list`, and `sites add`, `verify` (returns false for an unverified site), `remove` on a test site |
+| Submission | `SubmitUrl` and `SubmitUrlBatch` accepted and counted against the daily and monthly quota; `SubmitContent` works with an API key (the docs conflict on this) and is counted against the content quota |
+| Sitemaps, fetch, quota, crawl settings | Working; `SaveCrawlSettings` accepts a no-op save; `CrawlRate` is a 24-value numeric array |
+| Keywords | `GetKeyword`, `GetKeywordStats` (weekly rows), `GetRelatedKeywords` return data with `YYYY-MM-DD` dates |
+| Users, params, blocks, preview blocks | `GetSiteRoles` returns roles; add, enable/disable, and remove lifecycles work |
+| Geo-targeting | Works only with a lowercase country code (`us`); `US` returns `InvalidParameter`. `bwt` lowercases it |
+| Deep-link blocks | Work only with a lowercase market (`en-us`); `en-US` returns `InvalidParameter`. `bwt` lowercases it |
+| IndexNow | `api.indexnow.org` answered 202 (key validation pending) for an unhosted key |
+| Performance and crawl stats | Empty arrays for a site with little traffic; not an error |
+| `GetUrlInfo`, `GetUrlTrafficInfo`, `GetChildrenUrlInfo`, `GetChildrenUrlTrafficInfo` | `{"ErrorCode":2,"Message":"ERROR!!! UnknownError"}` for every URL form, also when called directly with curl; consistent with no crawl data for the site |
+| `GetSiteMoves` | HTTP 404; kept under `bwt experimental` |
+
+Still unsettled, because the test site had no data: the scale of `AvgClickPosition` and
+`AvgImpressionPosition`, whether performance `Date` values mark days or week buckets, and the URL information
+methods on a site Bing has crawled. `BlockReason` values beyond 1 (`ContentNeedsToBeRemoved`) are unknown.
 
 ## Refreshing the snapshot
 
@@ -85,7 +91,6 @@ account; until then the CLI takes the conservative behavior shown.
 | --- | --- |
 | Go | 1.26 minimum, toolchain 1.27.1 |
 | `github.com/spf13/cobra` | 1.10.2 |
-| `golang.org/x/oauth2` | 0.37.0 |
 | `github.com/zalando/go-keyring` | 0.2.8 |
 | `github.com/gofrs/flock` / `github.com/google/renameio/v2` | 0.13.1 / 2.0.2 |
 | `go.yaml.in/yaml/v3` | 3.0.5 |

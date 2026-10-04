@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -107,7 +106,7 @@ func TestAPIKeyLoginLifecycle(t *testing.T) {
 		}
 		return reply(200, sitesBody)
 	}}
-	res := run(t, f, "secret-api-key\n", "auth", "login", "--with-api-key", "--no-input", "-o", "json")
+	res := run(t, f, "secret-api-key\n", "auth", "login", "--no-input", "-o", "json")
 	if res.err != nil || strings.Contains(res.out+res.errOut, "secret-api-key") {
 		t.Fatalf("login: %v %s %s", res.err, res.out, res.errOut)
 	}
@@ -129,7 +128,7 @@ func TestAPIKeyLoginLifecycle(t *testing.T) {
 		t.Fatal("secret written to config")
 	}
 	res = run(t, f, "", "auth", "logout")
-	if res.err != nil || !strings.Contains(res.errOut, "no token revocation endpoint") {
+	if res.err != nil || !strings.Contains(res.errOut, "removes the key from this machine only") {
 		t.Fatalf("logout: %v %s", res.err, res.errOut)
 	}
 	if _, err := keyring.Get(testService(t), "default:api_key"); err == nil {
@@ -168,75 +167,56 @@ func TestKeychainUnavailableNeedsExplicitInsecureStorage(t *testing.T) {
 	}
 }
 
-func TestOAuthLoginAndBearerUse(t *testing.T) {
+func TestLoginRejectsABadKeyAndSavesNothing(t *testing.T) {
 	isolate(t)
-	t.Setenv("BWT_CLIENT_ID", "cid")
-	t.Setenv("BWT_CLIENT_SECRET", "csecret")
 	f := &fake{handle: func(r *http.Request, body string) *http.Response {
-		switch {
-		case r.URL.Path == "/webmasters/oauth/token":
-			form, _ := url.ParseQuery(body)
-			if form.Get("client_secret") != "csecret" || form.Get("code") != "code-1" || form.Get("code_verifier") == "" {
-				t.Errorf("token form %v", form)
-			}
-			return reply(200, `{"access_token":"access-1","token_type":"bearer","expires_in":3599,"refresh_token":"refresh-1"}`)
-		case r.URL.Host == "www.bing.com" && strings.HasSuffix(r.URL.Path, "/GetUserSites"):
-			if r.Header.Get("Authorization") != "Bearer access-1" {
-				t.Errorf("auth header %q", r.Header.Get("Authorization"))
-			}
-			return reply(200, `{"d":[{"Url":"https://a.example/"},{"Url":"https://b.example/"}]}`)
-		}
-		t.Errorf("unexpected %s", r.URL)
-		return reply(500, "{}")
+		return reply(400, `{"ErrorCode":3,"Message":"InvalidApiKey"}`)
 	}}
-	var out, errOut bytes.Buffer
-	a := &app{in: strings.NewReader(""), out: &out, errOut: &errOut, transport: f.transport()}
-	a.openBrowser = func(authURL string) error {
-		u, _ := url.Parse(authURL)
-		q := u.Query()
-		if q.Get("redirect_uri") != "http://127.0.0.1:47619/callback" || q.Get("scope") != "Webmaster.manage" {
-			t.Errorf("authorize URL %s", authURL)
-		}
-		go func() {
-			if res, err := http.Get(q.Get("redirect_uri") + "?code=code-1&state=" + url.QueryEscape(q.Get("state"))); err == nil {
-				res.Body.Close()
-			}
-		}()
-		return nil
+	res := run(t, f, "wrong-key\n", "auth", "login", "--no-input")
+	if res.err == nil || !strings.Contains(res.err.Error(), "nothing was saved") || !strings.Contains(res.err.Error(), "30 minutes") {
+		t.Fatalf("bad key: %v", res.err)
 	}
-	root := newRoot(a)
-	root.SetArgs([]string{"auth", "login", "-o", "json"})
-	if err := root.ExecuteContext(context.Background()); err != nil {
-		t.Fatalf("login: %v %s", err, errOut.String())
+	if _, err := keyring.Get(testService(t), "default:api_key"); err == nil {
+		t.Fatal("a rejected key was saved")
 	}
-	if strings.Contains(out.String()+errOut.String(), "refresh-1") || strings.Contains(out.String()+errOut.String(), "csecret") {
-		t.Fatal("secret printed")
+	if _, err := os.Stat(os.Getenv("BWT_CONFIG")); err == nil {
+		t.Fatal("a rejected key created a profile")
 	}
-	if !strings.Contains(out.String(), `"sites": 2`) || strings.Contains(out.String(), `"site":`) {
-		t.Fatalf("two sites without a terminal must not pick a default: %s", out.String())
+	if res := run(t, nil, "", "auth", "login", "--no-input"); res.err == nil || !strings.Contains(res.err.Error(), "nonempty") {
+		t.Fatalf("empty key: %v", res.err)
 	}
-	cfg, _ := os.ReadFile(os.Getenv("BWT_CONFIG"))
-	if !strings.Contains(string(cfg), "client_id: cid") || strings.Contains(string(cfg), "refresh-1") {
-		t.Fatalf("config: %s", cfg)
+	// --no-verify saves without a network call (for a key that is not active yet);
+	// the hidden --with-api-key alias still works.
+	f2 := &fake{}
+	if res := run(t, f2, "new-key\n", "auth", "login", "--with-api-key", "--no-verify", "--no-input"); res.err != nil || f2.count() != 0 {
+		t.Fatalf("--no-verify: %v calls=%d", res.err, f2.count())
 	}
-	// A later command uses the cached access token without another token call.
-	before := f.count()
-	if res := run(t, f, "", "sites", "list"); res.err != nil || f.count() != before+1 {
-		t.Fatalf("sites list: %v calls=%d", res.err, f.count()-before)
+	if v, _ := keyring.Get(testService(t), "default:api_key"); v != "new-key" {
+		t.Fatal("--no-verify did not save the key")
 	}
 }
 
-func TestBrowserLoginRefusedWithoutInput(t *testing.T) {
-	isolate(t)
-	t.Setenv("BWT_CLIENT_ID", "cid")
-	t.Setenv("BWT_CLIENT_SECRET", "s")
-	res := run(t, nil, "", "auth", "login", "--no-input")
-	if res.err == nil || !strings.Contains(res.err.Error(), "--with-api-key") {
-		t.Fatalf("%v", res.err)
+func TestLoginStepsOpenBingWebmasterTools(t *testing.T) {
+	var errOut bytes.Buffer
+	var opened string
+	a := &app{errOut: &errOut, openBrowser: func(u string) error { opened = u; return nil }}
+	a.showAPIKeySteps()
+	if opened != webmasterHome || !strings.Contains(errOut.String(), "Settings (gear icon) > API Access > API Key") || !strings.Contains(errOut.String(), webmasterHome) {
+		t.Fatalf("opened %q, printed %q", opened, errOut.String())
 	}
-	t.Setenv("BWT_CLIENT_ID", "")
-	if res := run(t, nil, "", "auth", "login"); res.err == nil || !strings.Contains(res.err.Error(), "no built-in OAuth client") {
-		t.Fatalf("missing client: %v", res.err)
+}
+
+func TestAccessTokenUsesBearerAuth(t *testing.T) {
+	isolate(t)
+	t.Setenv("BWT_ACCESS_TOKEN", "bearer-123")
+	f := &fake{handle: func(r *http.Request, body string) *http.Response {
+		if r.Header.Get("Authorization") != "Bearer bearer-123" || r.URL.Query().Has("apikey") || r.URL.Host != "www.bing.com" {
+			t.Errorf("bad bearer request %s", r.URL.Redacted())
+		}
+		return reply(200, sitesBody)
+	}}
+	if res := run(t, f, "", "sites", "list", "-o", "json"); res.err != nil || f.count() != 1 {
+		t.Fatalf("sites list: %v calls=%d", res.err, f.count())
 	}
 }
 
