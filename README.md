@@ -19,7 +19,7 @@ end to end against a live account. Independent project; not affiliated with Micr
 curl -fsSL https://raw.githubusercontent.com/piyush-gambhir/bing-webmaster-cli/main/install.sh | sh
 ```
 
-Installs `bwt` to `~/.local/bin` (override with `INSTALL_DIR`, pin with `VERSION=v0.1.0`) after verifying
+Installs `bwt` to `~/.local/bin` (override with `INSTALL_DIR`, pin with `VERSION=v0.1.2`) after verifying
 SHA-256 checksums. Prebuilt macOS, Linux, and Windows binaries are on the
 [releases page](https://github.com/piyush-gambhir/bing-webmaster-cli/releases). Another tool, Bitcoin Wallet
 Tracker, also installs a `bwt` binary; the installer and `bwt doctor` warn when one shadows the other.
@@ -124,7 +124,8 @@ ambiguous match is an error.
 - **Performance data is Bing's top rows.** The API has no server-side date range, limit, or paging.
   `--since`, `--until`, `--limit`, and `--sort` work locally, and JSON output says `filtered_locally`.
   Several methods update weekly, traffic daily. Positions are shown raw because their scale is undocumented.
-- **Accepted is not indexed.** `submit urls` and `indexnow submit` report what Bing received.
+- **Accepted is not indexed.** `submit urls`, `submit content`, and `indexnow submit` report what Bing
+  received.
 - **Empty is not healthy.** Bing's legacy link and crawl-issue methods can return empty lists for sites
   that have links or issues; `bwt` says so on stderr.
 - **No indexing verdict exists.** `url info` shows crawl details; the API has no "indexed" field.
