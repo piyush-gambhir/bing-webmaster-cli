@@ -1,11 +1,12 @@
 # Bing Webmaster CLI (`bwt`)
 
-A Go command-line interface for Bing Webmaster Tools: search performance, crawl health, URL and sitemap
-submission, IndexNow, keyword research, and site settings.
+A Go command-line interface for Bing Webmaster Tools: search performance, crawl health, URL, sitemap, and
+content submission, IndexNow, keyword research, and site settings.
 
-Designed for people and coding agents: one-command browser login, named profiles, table/JSON/YAML/CSV
-output, an effect-based `--read-only` mode, and a single cross-platform binary. Covers all 59 non-obsolete
-methods of the Bing Webmaster JSON API plus IndexNow. Independent project; not affiliated with Microsoft.
+Built mainly for coding agents and usable by people: API-key login with keychain storage, named profiles,
+stable JSON (plus table, YAML, and CSV), an effect-based `--read-only` mode, dry runs, and a single
+cross-platform binary. Covers all 59 non-obsolete methods of the Bing Webmaster JSON API plus IndexNow, checked
+end to end against a live account. Independent project; not affiliated with Microsoft.
 
 [![CI](https://github.com/piyush-gambhir/bing-webmaster-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/piyush-gambhir/bing-webmaster-cli/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/piyush-gambhir/bing-webmaster-cli)](https://github.com/piyush-gambhir/bing-webmaster-cli/releases)
@@ -48,14 +49,27 @@ gh attestation verify bing-webmaster-cli_darwin_arm64.tar.gz --repo piyush-gambh
 bwt auth login                      # opens Bing Webmaster Tools; paste your API key; picks a default site
 
 bwt sites list
-bwt stats traffic --since 2026-09-01
+bwt stats summary --compare previous    # traffic trend, with the window stated
 bwt stats queries --sort clicks --limit 20 -o csv > top-queries.csv
 bwt crawl issues
-bwt indexnow key generate           # then upload KEY.txt to your site root
+bwt indexnow key generate           # follows your site's www redirect; then upload KEY.txt to that host
+bwt indexnow key check
 bwt indexnow submit --sitemap https://www.example.com/sitemap.xml --changed-since 2026-10-01
-bwt submit urls https://www.example.com/new-page
+bwt submit urls https://www.example.com/new-page --dry-run   # see the request, then run without --dry-run
 bwt quota
 ```
+
+The API key is under **Settings (gear icon) > API Access > API Key** in Bing Webmaster Tools; one key covers
+all your sites. For scripts and CI, set `BWT_API_KEY` instead of logging in.
+
+## For AI agents
+
+Agents should read [bwt/SKILL.md](bwt/SKILL.md). The essentials:
+
+- Run commands with `-o json --no-input`; data is on stdout, notes and structured errors on stderr.
+- `bwt api methods -o json` lists every Bing method with its read/write effect and the command that calls it.
+- `bwt auth status -o json` shows the active credential and site without a network call.
+- Use `--read-only` by default and `--dry-run` before any write; destructive commands need `--yes`.
 
 ## Commands
 

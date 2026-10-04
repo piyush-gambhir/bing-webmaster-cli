@@ -18,6 +18,16 @@ Re-checked by Claude against primary sources on 2026-10-03:
 Where this research recommends something different from [PLAN.md](PLAN.md) (binary name, OAuth timing),
 PLAN.md records the decision and why.
 
+Verified against a live account on 2026-10-04 (details in [docs/compatibility.md](docs/compatibility.md)):
+
+- Bing's OAuth client registration rejects loopback redirect URIs (`http://127.0.0.1:47619/callback`,
+  `http://localhost:47619/callback`), so OAuth cannot serve a CLI; the CLI logs in with an API key.
+- `SubmitContent` works with an API key, resolving the documentation conflict noted below.
+- `AddCountryRegionSettings` needs a lowercase country code and `AddDeepLinkBlock` a lowercase market;
+  uppercase values return `InvalidParameter`.
+- `GetUrlInfo`, `GetUrlTrafficInfo`, and the children methods return `UnknownError` for a site without crawl
+  data; `GetSiteMoves` returns HTTP 404.
+
 ## 1. Summary
 
 - **Build against JSON over HTTPS.** Microsoft announced retirement of the legacy SOAP and POX/XML services on **2026-08-31**. Current documentation retains the JSON endpoint family at `https://ssl.bing.com/webmaster/api.svc/json/{Method}`. [API overview](https://learn.microsoft.com/en-us/bingwebmaster/), [protocols](https://learn.microsoft.com/en-us/bingwebmaster/api-protocols).
