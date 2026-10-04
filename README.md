@@ -62,7 +62,8 @@ Release notes: https://github.com/piyush-gambhir/bing-webmaster-cli/releases/tag
 
 It never checks (no network, no output) when stderr is not a terminal, when `CI` is set, with `--quiet` or
 `BWT_QUIET`, or when `BWT_NO_UPDATE_NOTIFIER=1` or `NO_UPDATE_NOTIFIER=1` is set, so scripts, CI, and agents
-are not affected. `bwt version` shows the last known latest version from that check without a network call.
+are not affected. Only the one command a day that runs the check waits for it, at most 1 second after its
+output. `bwt version` shows the last known latest version from that check without a network call.
 
 
 ### Verify a download

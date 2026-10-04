@@ -117,6 +117,59 @@ func TestUpdateNoticeChecksOnceAndShowsOncePerDay(t *testing.T) {
 	}
 }
 
+// slow delays every response of f by d, or until the request is cancelled.
+func slow(f *fake, d time.Duration) *fake {
+	h := f.handle
+	f.handle = func(r *http.Request, body string) *http.Response {
+		select {
+		case <-time.After(d):
+		case <-r.Context().Done():
+		}
+		return h(r, body)
+	}
+	return f
+}
+
+// timedRun is runUpdateApp, also returning how long the command itself took
+// (without the background check).
+func timedRun(t *testing.T, f *fake, exe string, args ...string) (result, time.Duration) {
+	t.Helper()
+	var out, errOut bytes.Buffer
+	a := &app{in: strings.NewReader(""), out: &out, errOut: &errOut, transport: f.transport(), exePath: exe,
+		stderrTTY: func() bool { return true }}
+	root := newRoot(a)
+	root.SetArgs(args)
+	start := time.Now()
+	err := root.ExecuteContext(context.Background())
+	took := time.Since(start)
+	a.checks.Wait()
+	return result{err, out.String(), errOut.String()}, took
+}
+
+func TestUpdateNoticeWaitsForTheDaysCheck(t *testing.T) {
+	exe := filepath.Join(t.TempDir(), "bwt")
+	// The day's check answers after the command's output: the notice still prints on this run.
+	updateEnv(t, "0.1.3")
+	res, _ := timedRun(t, slow(gh(t, "v0.1.4", nil), 200*time.Millisecond), exe, "api", "methods", "-o", "json")
+	if res.err != nil || !strings.Contains(res.errOut, noticeText) {
+		t.Fatalf("notice lost to a fast command: %v stderr=%q", res.err, res.errOut)
+	}
+
+	// A check slower than NoticeWait delays the command by at most NoticeWait.
+	dir := updateEnv(t, "0.1.3")
+	res, took := timedRun(t, slow(gh(t, "v0.1.4", nil), update.NoticeWait+500*time.Millisecond), exe, "api", "methods", "-o", "json")
+	if res.err != nil || strings.Contains(res.errOut, noticeText) || took > update.NoticeWait+300*time.Millisecond {
+		t.Fatalf("slow check: %v took %v stderr=%q", res.err, took, res.errOut)
+	}
+
+	// An answer from the cache never waits.
+	update.WriteCache(dir, update.Cache{CheckedAt: time.Now(), LatestVersion: "0.1.3"})
+	f := &fake{}
+	if res, took = timedRun(t, f, exe, "api", "methods"); res.err != nil || f.count() != 0 || took > 300*time.Millisecond {
+		t.Fatalf("cached check: %v requests=%d took %v", res.err, f.count(), took)
+	}
+}
+
 func TestUpdateNoticeSuppressed(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -239,8 +292,9 @@ func TestUpdateInstalls(t *testing.T) {
 	if b, _ := os.ReadFile(exe); string(b) != "new bwt" {
 		t.Fatalf("exe holds %q", b)
 	}
-	if _, err := os.Stat(filepath.Join(dir, update.CacheFile)); !os.IsNotExist(err) {
-		t.Fatalf("update cache not cleared: %v", err)
+	// The check that found the release is kept, so the notifier agrees with it.
+	if c := update.ReadCache(dir); c.LatestVersion != "0.1.4" || time.Since(c.CheckedAt) > time.Minute {
+		t.Fatalf("update result not cached: %+v", c)
 	}
 }
 

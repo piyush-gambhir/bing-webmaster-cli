@@ -41,8 +41,8 @@ func (a *app) notifierEnabled(cmd *cobra.Command) bool {
 }
 
 // startUpdateCheck runs in PersistentPreRun. A fresh cache answers at once;
-// otherwise GitHub is queried in the background and the result is used only if
-// it arrives before the command finishes.
+// otherwise GitHub is queried in the background (at most once a day) while the
+// command runs.
 func (a *app) startUpdateCheck(cmd *cobra.Command) {
 	if !a.notifierEnabled(cmd) {
 		return
@@ -61,6 +61,7 @@ func (a *app) startUpdateCheck(cmd *cobra.Command) {
 	c.AttemptedAt = now
 	_ = update.WriteCache(dir, c)
 	src := a.releases()
+	a.checkStarted = true
 	a.checks.Go(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), update.CheckTimeout)
 		defer cancel()
@@ -69,14 +70,23 @@ func (a *app) startUpdateCheck(cmd *cobra.Command) {
 	})
 }
 
-// printUpdateNotice runs in PersistentPostRun, after the command's output. It
-// never waits for the check.
+// printUpdateNotice runs in PersistentPostRun, after the command's output. A
+// cached answer is used at once. If this run started the day's check, it waits
+// up to NoticeWait for the answer: the check is already recorded as attempted,
+// so an answer lost to a fast command would hide the notice for a day.
 func (a *app) printUpdateNotice() {
 	var c update.Cache
 	select {
 	case c = <-a.updateCheck: // a nil channel (no check) never receives
 	default:
-		return
+		if !a.checkStarted {
+			return
+		}
+		select {
+		case c = <-a.updateCheck:
+		case <-time.After(update.NoticeWait):
+			return
+		}
 	}
 	now := time.Now()
 	if !c.ShouldNotify(build.Version, now) {

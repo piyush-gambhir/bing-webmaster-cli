@@ -37,9 +37,11 @@ type app struct {
 	exePath   string
 	stderrTTY func() bool
 	// updateCheck carries the release check from PersistentPreRun to
-	// PersistentPostRun; checks tracks its background request.
-	updateCheck chan update.Cache
-	checks      sync.WaitGroup
+	// PersistentPostRun; checks tracks its background request, and
+	// checkStarted is set when this run sent it.
+	updateCheck  chan update.Cache
+	checks       sync.WaitGroup
+	checkStarted bool
 }
 
 func envBool(name string) bool { s := os.Getenv(name); return s == "1" || strings.EqualFold(s, "true") }

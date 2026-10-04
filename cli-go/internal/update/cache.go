@@ -2,9 +2,7 @@ package update
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,6 +16,9 @@ const (
 	CheckInterval = 24 * time.Hour
 	// CheckTimeout bounds the background release check.
 	CheckTimeout = 3 * time.Second
+	// NoticeWait is how long a command that started the day's check waits for
+	// its answer after the output, so a fast command does not lose it.
+	NoticeWait = time.Second
 )
 
 // Cache is update-check.json.
@@ -62,15 +63,6 @@ func WriteCache(dir string, c Cache) error {
 		return err
 	}
 	return os.Rename(f.Name(), filepath.Join(dir, CacheFile))
-}
-
-// ClearCache removes the cache in dir.
-func ClearCache(dir string) error {
-	err := os.Remove(filepath.Join(dir, CacheFile))
-	if errors.Is(err, fs.ErrNotExist) {
-		return nil
-	}
-	return err
 }
 
 // Record stores the result of a release check, keeping the notice history and
