@@ -65,7 +65,7 @@ and every change was undone. Commands with outside effects (`users add`, `users 
 | Deep-link blocks | Work only with a lowercase market (`en-us`); `en-US` returns `InvalidParameter`. `bwt` lowercases it |
 | IndexNow | `api.indexnow.org` answered 202 (key validation pending) for an unhosted key |
 | Performance and crawl stats | Empty arrays for a site with little traffic; not an error |
-| `GetUrlInfo`, `GetUrlTrafficInfo`, `GetChildrenUrlInfo`, `GetChildrenUrlTrafficInfo` | `{"ErrorCode":2,"Message":"ERROR!!! UnknownError"}` for every URL form, also when called directly with curl; consistent with no crawl data for the site |
+| `GetUrlInfo`, `GetUrlTrafficInfo`, `GetChildrenUrlInfo`, `GetChildrenUrlTrafficInfo` | `{"ErrorCode":2,"Message":"ERROR!!! UnknownError"}` for every URL form, also when called directly with curl. Seen on a site without crawl data; Microsoft documents no cause |
 | `GetSiteMoves` | HTTP 404; kept under `bwt experimental` |
 
 Still unsettled, because the test site had no data: the scale of `AvgClickPosition` and

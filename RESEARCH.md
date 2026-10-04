@@ -26,7 +26,7 @@ Verified against a live account on 2026-10-04 (details in [docs/compatibility.md
 - `AddCountryRegionSettings` needs a lowercase country code and `AddDeepLinkBlock` a lowercase market;
   uppercase values return `InvalidParameter`.
 - `GetUrlInfo`, `GetUrlTrafficInfo`, and the children methods return `UnknownError` for a site without crawl
-  data; `GetSiteMoves` returns HTTP 404.
+  data (Microsoft documents no cause); `GetSiteMoves` returns HTTP 404 (still documented, not marked obsolete).
 
 ## 1. Summary
 

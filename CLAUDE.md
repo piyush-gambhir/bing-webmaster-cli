@@ -21,7 +21,8 @@ Use `bwt --help` and `docs/commands.md` for current flags; `bwt/SKILL.md` has op
   because Bing's OAuth registration rejects loopback redirect URIs (verified 2026-10-04); do not add one back
   without a public redirect design. `--access-token` / `BWT_ACCESS_TOKEN` stay for externally obtained tokens.
 - Bing quirks verified live: country codes (geo) and market codes (deep-link blocks) must be lowercase;
-  URL information methods return UnknownError for sites without crawl data; GetSiteMoves returns 404.
+  URL information methods returned UnknownError on a site without crawl data (cause undocumented, so never
+  report it as "not indexed"); GetSiteMoves returns 404.
 - Preserve stdout as command data and stderr as diagnostics. No automatic retries, no background calls.
 - Do not present performance rows as complete, submissions as indexed, or empty legacy results as healthy.
 - Tests use fake transports, temporary configs, and `keyring.MockInit()`; never the network or a real keychain.

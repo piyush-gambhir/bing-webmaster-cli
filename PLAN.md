@@ -33,7 +33,7 @@ tables stay readable for people.
 | Agent discovery | `bwt api methods -o json`: every method with effect, status, and command | Done |
 | Agent guidance | `bwt/SKILL.md` rewritten agent-first: discovery, credentials, error names, safety, verified behavior, recipes | Done |
 | Tables | One-row tables for single objects (`fetch get` no longer dumps the document); named columns for preview and deep-link blocks; dry runs as one row per request; empty paged results print `No results.` | Done |
-| Messages | Hints for `UnknownError` (no data for the URL yet) and for empty stats on new sites | Done |
+| Messages | Hints for `UnknownError` (no reason given; seen on sites without crawl data) and for empty stats on new sites | Done |
 | IndexNow | Key commands follow the site's www redirect so keys land on the serving host; key-check errors name the right `--host` | Done |
 | URL methods | Accept Bing's documented `domain:example.com` form | Done |
 | Fetch | `fetch get --save FILE` writes the fetched document | Done |

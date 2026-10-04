@@ -116,6 +116,8 @@ func (a *app) profileCreds(cfg *config.Config, path, name string) (*creds, error
 			return nil, err
 		}
 		return &creds{kind: "api_key", source: "profile:" + name, profile: name, apiKey: key}, nil
+	case "oauth": // written by v0.1.1
+		return nil, fmt.Errorf("profile %q used browser login, which bwt no longer supports; run bwt auth login --profile %s with your API key", name, name)
 	default:
 		return nil, fmt.Errorf("profile %q has no Bing credentials; run bwt auth login --profile %s", name, name)
 	}

@@ -17,6 +17,11 @@ import (
 // SecretKey names a profile's secret in the store.
 func SecretKey(profile, kind string) string { return profile + ":" + kind }
 
+// LegacyKinds are secret kinds that v0.1.1 browser logins wrote (a refresh
+// token and a cached access token). Nothing writes them now, but login and
+// logout still delete them so upgrading never strands those tokens.
+var LegacyKinds = []string{"oauth", "access"}
+
 // LockProfile takes the per-profile cross-process lock, so concurrent logins
 // and logouts of the same profile cannot interleave.
 func LockProfile(ctx context.Context, configPath, profile string) (func(), error) {

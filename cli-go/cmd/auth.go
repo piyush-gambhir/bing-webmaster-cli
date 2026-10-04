@@ -176,13 +176,14 @@ func (a *app) loginCmd() *cobra.Command {
 			sort.Strings(sites)
 		}
 		// Choose a default site before taking the lock, since it may prompt.
-		chosen := cfg.Profiles[name].Site
+		chosen, picked := cfg.Profiles[name].Site, false
 		switch {
 		case noVerify, chosen != "" && slices.Contains(sites, chosen):
 		case len(sites) == 1:
 			chosen = sites[0]
 		case len(sites) > 1:
 			chosen = a.pick(sites)
+			picked = chosen != ""
 		default:
 			chosen = ""
 		}
@@ -206,11 +207,32 @@ func (a *app) loginCmd() *cobra.Command {
 		if err != nil {
 			return fmt.Errorf("%w\nNo OS keychain is available. Rerun with --insecure-storage to keep the key in a 0600 file, or set BWT_API_KEY without saving", err)
 		}
-		if previous.TokenStore != "" && secrets.Backend(previous.TokenStore) != saved.Backend {
-			_ = store.Delete(ctx, secrets.Backend(previous.TokenStore), auth.SecretKey(name, "api_key"))
+		// Delete what the profile held before: v0.1.1 OAuth tokens, and the old key
+		// when the backend changed. The new key is saved, so a failure only warns.
+		backends := []secrets.Backend{saved.Backend}
+		if old := secrets.Backend(previous.TokenStore); old != "" && old != saved.Backend {
+			backends = append(backends, old)
 		}
-		if noVerify {
-			chosen = previous.Site // unchecked key: keep whatever site the profile had
+		var leftovers []string
+		for _, b := range backends {
+			kinds := auth.LegacyKinds
+			if b != saved.Backend {
+				kinds = append([]string{"api_key"}, kinds...)
+			}
+			for _, kind := range kinds {
+				if err := store.Delete(ctx, b, auth.SecretKey(name, kind)); err != nil {
+					leftovers = append(leftovers, fmt.Sprintf("%s (%s): %v", auth.SecretKey(name, kind), b, err))
+				}
+			}
+		}
+		if len(leftovers) > 0 {
+			fmt.Fprintf(a.errOut, "Could not delete old credentials, so remove them by hand: %s\n", strings.Join(leftovers, "; "))
+		}
+		switch {
+		case noVerify:
+			chosen = previous.Site // unchecked key: keep whatever site the profile has now
+		case !picked && previous.Site != "" && slices.Contains(sites, previous.Site):
+			chosen = previous.Site // another process may have run `bwt sites use` meanwhile
 		}
 		profile := config.Profile{Auth: config.AuthAPIKey, TokenStore: string(saved.Backend), Site: chosen, IndexNow: previous.IndexNow}
 		if err := config.Update(ctx, path, func(c *config.Config) error {
@@ -379,8 +401,12 @@ func (a *app) logoutCmd() *cobra.Command {
 				return fmt.Errorf("profile %q not found", name)
 			}
 			if p.TokenStore != "" {
-				if err := store.Delete(cmd.Context(), secrets.Backend(p.TokenStore), auth.SecretKey(name, "api_key")); err != nil {
-					return fmt.Errorf("could not delete the saved key: %w", err)
+				// Also delete v0.1.1 OAuth tokens. Fail before forgetting the backend,
+				// or nothing would know where the leftovers live.
+				for _, kind := range append([]string{"api_key"}, auth.LegacyKinds...) {
+					if err := store.Delete(cmd.Context(), secrets.Backend(p.TokenStore), auth.SecretKey(name, kind)); err != nil {
+						return fmt.Errorf("could not delete the saved %s credential: %w", kind, err)
+					}
 				}
 			}
 			if err := config.Update(cmd.Context(), path, func(c *config.Config) error {

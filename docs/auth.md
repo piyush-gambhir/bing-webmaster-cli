@@ -61,6 +61,10 @@ A command-line tool can only receive an OAuth code on the local machine, so brow
 web page that relays codes to the CLI. That adds a server and a place where codes can leak, while an API key
 gives the same access with one copy and paste.
 
+Upgrading from v0.1.1, which had a browser login: those profiles stop working until you run
+`bwt auth login --profile NAME` with an API key. Login and logout both delete the old OAuth tokens from the
+keychain.
+
 ## Credential precedence
 
 `--access-token` > `BWT_ACCESS_TOKEN` > `--api-key` > `BWT_API_KEY` > the selected profile. Profile selection
@@ -82,6 +86,7 @@ messages, and transport errors.
 | --- | --- |
 | `Bing did not accept this key, so nothing was saved` | Check the key; a new key can take about 30 minutes to activate. Retry later, or pass `--no-verify` to save it now |
 | `InvalidApiKey` | The key was regenerated or mistyped; run `bwt auth login` |
+| `used browser login, which bwt no longer supports` | The profile is from v0.1.1; run `bwt auth login` with your API key |
 | `No OS keychain is available` | Start a keychain service, pass `--insecure-storage`, or use `BWT_API_KEY` |
 | `OS keychain did not respond within 10s` | Unlock the keychain and retry |
 | `NotAuthorized` | Use the site URL exactly as `bwt sites list` prints it, and check that your account can access the site |

@@ -26,8 +26,8 @@ Use the installed `bwt` binary. Every subcommand has `--help`; the full referenc
   is removed (`--raw` shows the wire format).
 - On failure the exit code is 1 and stderr holds JSON with `method`, `http_status`, `api_error_code`, and
   `api_error_name`. Common names: `InvalidApiKey` (ask for a new login), `NotAuthorized` (wrong site URL or no
-  access), `ThrottleUser`/`ThrottleHost` (stop; do not retry in a loop), `UnknownError` on URL or link methods
-  (Bing has no data for that URL yet).
+  access), `ThrottleUser`/`ThrottleHost` (stop; do not retry in a loop), `UnknownError` on URL methods
+  (Bing gave no reason; seen on sites without crawl data; never report it as "not indexed").
 
 ## Safety
 
@@ -51,7 +51,8 @@ Use the installed `bwt` binary. Every subcommand has `--help`; the full referenc
 - Working: sites, stats, crawl, sitemaps, quota, keywords, users, fetch, params, block, preview-blocks, geo,
   deeplink-blocks, `submit urls`, `submit content` (works with an API key), and IndexNow.
 - `geo` and `deeplink-blocks` need lowercase country and market codes; `bwt` lowercases them for you.
-- `url info`, `url traffic`, and `url children` return `UnknownError` for sites Bing has not crawled yet.
+- `url info`, `url traffic`, and `url children` returned `UnknownError` for a newly added site. Microsoft documents
+  no cause, so treat it as "no answer", not "not indexed".
 - `bwt experimental site-move` returned HTTP 404; avoid it unless the user explicitly asks.
 
 ## Recipes

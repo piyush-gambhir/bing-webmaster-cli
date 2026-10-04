@@ -16,7 +16,7 @@ var ErrorNames = map[int]string{
 
 var hints = map[int]string{
 	1:  "Bing reported an internal error; try again later",
-	2:  "Bing gave no detail; for URL and link methods this usually means Bing has no data for that URL yet (a new or uncrawled site)",
+	2:  "Bing gave no reason. URL methods have returned this for sites without crawl data, but Microsoft documents no cause, so it does not mean the URL is not indexed; retry later or check the URL in Bing Webmaster Tools",
 	3:  "the API key is invalid; a newly generated key can take about 30 minutes to start working (check BWT_API_KEY or run bwt auth login)",
 	4:  "Bing is throttling this user; wait before trying again (no automatic retry was attempted)",
 	5:  "Bing is throttling this host; wait before trying again (no automatic retry was attempted)",
