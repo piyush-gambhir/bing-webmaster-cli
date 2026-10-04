@@ -58,15 +58,15 @@ export default function PrivacyPage() {
           IndexNow key file is published.
         </li>
         <li>
-          <strong>GitHub</strong>, when you run <code>bwt update</code>, to find and
-          download the latest release, and for the update notice described below. These
-          requests contain no personal data.
+          <strong>GitHub</strong> (github.com release pages, not the GitHub API), when you
+          run <code>bwt update</code>, to find and download the latest release, and for the
+          update notice described below. These requests contain no personal data.
         </li>
       </ul>
       <p>
         The only background request is the update check: at most once a day, and only
-        when the CLI runs in an interactive terminal, it asks GitHub for the latest
-        release number so it can tell you a new version is out. It never runs in scripts,
+        when the CLI runs in an interactive terminal, it reads the latest release number
+        from the github.com release page so it can tell you a new version is out. It never runs in scripts,
         in CI (when <code>CI</code> is set), or with <code>--quiet</code>, and you can turn
         it off by setting <code>BWT_NO_UPDATE_NOTIFIER=1</code> or{' '}
         <code>NO_UPDATE_NOTIFIER=1</code>. The maintainer is not a party to, and cannot

@@ -69,7 +69,8 @@ own. A `bwt` in a Go bin directory (`$GOBIN`, `$GOPATH/bin`, or `~/go/bin`) came
 
 ### Update notice
 
-In an interactive terminal, `bwt` checks GitHub for a new release at most once a day. When one is out, it
+In an interactive terminal, `bwt` checks the github.com release page for a new release at most once a day
+(not the GitHub API, so its per-IP rate limit never applies). When one is out, it
 prints a notice on stderr after the command's output, at most once a day per version:
 
 ```text

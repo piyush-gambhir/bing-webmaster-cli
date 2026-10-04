@@ -10,12 +10,12 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -36,14 +36,18 @@ const (
 	MethodSelf = "self"
 	MethodGo   = "go"
 
+	// LatestTimeout bounds the latest-release lookup; the background check
+	// cancels sooner (CheckTimeout).
+	LatestTimeout = 15 * time.Second
+
 	maxBinary = 64 << 20
 )
 
 var versionPattern = regexp.MustCompile(`^v?([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z.-]+))?$`)
 
 type Release struct {
-	Tag string `json:"tag_name"`
-	URL string `json:"html_url"`
+	Tag string
+	URL string
 }
 
 // Version is the tag without its leading v.
@@ -57,14 +61,13 @@ func ReleaseURL(version string) string {
 // Source is where releases are looked up and downloaded. Tests point it at a
 // local server.
 type Source struct {
-	API       string // GitHub API base URL
-	Download  string // GitHub base URL for release assets
+	Download  string // GitHub base URL for release pages and assets
 	Transport http.RoundTripper
 }
 
 // GitHub is the real release source; a nil transport uses the default.
 func GitHub(t http.RoundTripper) Source {
-	return Source{API: "https://api.github.com", Download: "https://github.com", Transport: t}
+	return Source{Download: "https://github.com", Transport: t}
 }
 
 func (s Source) get(ctx context.Context, url string, limit int64) ([]byte, error) {
@@ -100,21 +103,54 @@ func (s Source) get(ctx context.Context, url string, limit int64) ([]byte, error
 	return b, nil
 }
 
-// Latest returns the latest published (non-prerelease) release.
+// Latest returns the latest published (non-prerelease) release. It reads the
+// tag from the redirect of github.com/<repo>/releases/latest instead of the
+// GitHub API, whose unauthenticated limit (60 requests an hour per IP) fails
+// behind shared NAT, CI runners, and VPNs. The redirect is never followed.
 func (s Source) Latest(ctx context.Context) (*Release, error) {
-	b, err := s.get(ctx, s.API+"/repos/"+Repo+"/releases/latest", 1<<20)
+	r, err := s.latest(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("checking the latest release: %w", err)
 	}
-	var r Release
-	if err := json.Unmarshal(b, &r); err != nil {
+	return r, nil
+}
+
+func (s Source) latest(ctx context.Context) (*Release, error) {
+	page := s.Download + "/" + Repo + "/releases/latest"
+	req, err := http.NewRequestWithContext(ctx, "GET", page, nil)
+	if err != nil {
 		return nil, err
 	}
-	if !strings.HasPrefix(r.Tag, "v") || !IsRelease(r.Tag) {
-		return nil, fmt.Errorf("invalid release version %q", r.Tag)
+	req.Header.Set("User-Agent", "bwt")
+	h := &http.Client{Timeout: LatestTimeout, Transport: s.Transport, CheckRedirect: func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}}
+	res, err := h.Do(req)
+	if err != nil {
+		return nil, err
 	}
-	r.URL = ReleaseURL(r.Tag)
-	return &r, nil
+	res.Body.Close()
+	if res.StatusCode != http.StatusFound {
+		return nil, fmt.Errorf("%s returned HTTP %d, expected a redirect to the latest release", page, res.StatusCode)
+	}
+	location := res.Header.Get("Location")
+	if location == "" {
+		return nil, fmt.Errorf("%s redirected without a Location", page)
+	}
+	base, err := url.Parse(s.Download)
+	if err != nil {
+		return nil, err
+	}
+	loc, err := url.Parse(location)
+	prefix := "/" + Repo + "/releases/tag/"
+	if err != nil || loc.Scheme != base.Scheme || loc.Host != base.Host || !strings.HasPrefix(loc.Path, prefix) {
+		return nil, fmt.Errorf("%s redirected to %q, not a %s release page", page, location, Repo)
+	}
+	tag := strings.TrimPrefix(loc.Path, prefix)
+	if !strings.HasPrefix(tag, "v") || !IsRelease(tag) {
+		return nil, fmt.Errorf("invalid release version %q", tag)
+	}
+	return &Release{Tag: tag, URL: ReleaseURL(tag)}, nil
 }
 
 // AssetName is the GoReleaser archive for a platform (cli-go/.goreleaser.yaml).

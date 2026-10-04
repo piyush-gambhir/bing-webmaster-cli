@@ -42,12 +42,16 @@ func updateEnv(t *testing.T, version string) string {
 	return dir
 }
 
-// gh fakes GitHub: releases/latest returns tag, and assets are served from files.
+// gh fakes github.com: releases/latest redirects to tag (any other request,
+// such as following that redirect, fails the test), and assets are served
+// from files.
 func gh(t *testing.T, tag string, files map[string][]byte) *fake {
 	return &fake{handle: func(r *http.Request, body string) *http.Response {
 		switch {
-		case r.URL.Host == "api.github.com" && r.URL.Path == "/repos/"+update.Repo+"/releases/latest":
-			return reply(200, fmt.Sprintf(`{"tag_name":%q}`, tag))
+		case r.URL.Host == "github.com" && r.URL.Path == "/"+update.Repo+"/releases/latest":
+			res := reply(http.StatusFound, "")
+			res.Header.Set("Location", "https://github.com/"+update.Repo+"/releases/tag/"+tag)
+			return res
 		case r.URL.Host == "github.com" && strings.HasPrefix(r.URL.Path, "/"+update.Repo+"/releases/download/"+tag+"/"):
 			if b, ok := files[filepath.Base(r.URL.Path)]; ok {
 				return reply(200, string(b))
