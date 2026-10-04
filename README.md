@@ -36,6 +36,33 @@ make build            # bin/bwt
 make install          # $(go env GOPATH)/bin/bwt, or INSTALL_DIR=...
 ```
 
+### Update
+
+```bash
+bwt update --check    # current and latest version; -o json for scripts
+bwt update            # asks, then installs the latest release after SHA-256 verification
+```
+
+`bwt update` works on macOS, Linux, and Windows. It downloads the release archive for your platform, checks
+it against the release's `checksums.txt`, and replaces the running executable (on Windows the old one is
+renamed to `bwt.exe.old` and deleted on a later run). `--yes` skips the question; `--no-input` requires
+`--yes`. If the install directory is not writable it stops and leaves the old binary in place. A `bwt` in a
+Go bin directory (`$GOBIN`, `$GOPATH/bin`, `~/go/bin`) came from a source build, so `bwt update` tells you to
+run `git pull && make install` in your checkout instead of replacing it.
+
+In an interactive terminal, `bwt` checks GitHub for a new release at most once a day and, after a command's
+output, prints a notice on stderr:
+
+```text
+A new version of bwt is available: v0.1.3 -> v0.1.4
+Update with: bwt update
+Release notes: https://github.com/piyush-gambhir/bing-webmaster-cli/releases/tag/v0.1.4
+```
+
+It never checks (no network, no output) when stderr is not a terminal, when `CI` is set, with `--quiet` or
+`BWT_QUIET`, or when `BWT_NO_UPDATE_NOTIFIER=1` or `NO_UPDATE_NOTIFIER=1` is set, so scripts, CI, and agents
+are not affected. `bwt version` shows the last known latest version from that check without a network call.
+
 
 ### Verify a download
 
@@ -115,6 +142,7 @@ loopback redirect a CLI needs.
 | `BWT_CONFIG` | Config file path (default `~/.config/bing-webmaster-cli/config.yaml`, XDG-aware) |
 | `BWT_INDEXNOW_KEY` | IndexNow key for submissions |
 | `BWT_NO_INPUT`, `BWT_QUIET`, `BWT_VERBOSE`, `BWT_READ_ONLY` | Behavior switches (`1` or `true`) |
+| `BWT_NO_UPDATE_NOTIFIER`, `NO_UPDATE_NOTIFIER` | Turn off the daily release check and update notice (any value) |
 
 ## Sites
 
@@ -146,7 +174,7 @@ can discover capabilities without reading docs.
 - `--read-only` blocks every command that changes Bing state, local credentials, or the binary. Effects come
   from a registry of all 62 methods, so reads over POST (`url children`) still work.
 - `--dry-run` prints write requests (including every batch) without sending them.
-- Destructive commands confirm, or need `--yes` with `--no-input`.
+- Destructive commands and `update` confirm, or need `--yes` (`-y`) with `--no-input`.
 - No automatic retries. Throttling (`ThrottleUser`, `ThrottleHost`, HTTP 429) is reported, not retried.
 - Redirects never forward credentials, and API keys never appear in logs or errors.
 

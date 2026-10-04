@@ -12,7 +12,7 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy">
+    <LegalPage title="Privacy Policy" effective="October 5, 2026">
       <p className="legal-page__lede">
         Bing Webmaster CLI (the <code>bwt</code> command-line tool) is an open-source
         program that runs entirely on your own computer. It does <strong>not</strong>{' '}
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
       </p>
 
       <h2>3. Network connections</h2>
-      <p>The CLI makes outbound network requests only when you run a command, and only to:</p>
+      <p>The CLI makes outbound network requests only while you run a command, and only to:</p>
       <ul>
         <li>
           <strong>The Bing Webmaster API</strong>, to perform the actions you request:{' '}
@@ -58,13 +58,19 @@ export default function PrivacyPage() {
           IndexNow key file is published.
         </li>
         <li>
-          <strong>GitHub</strong>, only when you run <code>bwt update</code>, to find and
-          download the latest release. This request contains no personal data.
+          <strong>GitHub</strong>, when you run <code>bwt update</code>, to find and
+          download the latest release, and for the update notice described below. These
+          requests contain no personal data.
         </li>
       </ul>
       <p>
-        There are no background requests. The maintainer is not a party to, and cannot
-        observe, these connections.
+        The only background request is the update check: at most once a day, and only
+        when the CLI runs in an interactive terminal, it asks GitHub for the latest
+        release number so it can tell you a new version is out. It never runs in scripts,
+        in CI (when <code>CI</code> is set), or with <code>--quiet</code>, and you can turn
+        it off by setting <code>BWT_NO_UPDATE_NOTIFIER=1</code> or{' '}
+        <code>NO_UPDATE_NOTIFIER=1</code>. The maintainer is not a party to, and cannot
+        observe, any of these connections.
       </p>
 
       <h2>4. Data you access through the tool</h2>

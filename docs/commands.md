@@ -17,7 +17,7 @@ Global flags apply to every command.
   -s, --site string           Site URL exactly as in sites list, or a bare host (or BWT_SITE)
       --timeout duration      HTTP request timeout (default 30s)
   -v, --verbose               Log method, redacted URL, and status to stderr
-      --yes                   Confirm destructive commands without a prompt
+  -y, --yes                   Confirm destructive commands and updates without a prompt
 ```
 
 ## bwt
@@ -1270,14 +1270,33 @@ bwt submit urls [URL...] [flags]
 
 ## bwt update
 
-Install the latest GitHub release after SHA-256 verification
+Update bwt to the latest release (SHA-256 verified)
+
+Downloads the latest GitHub release for this OS and architecture, verifies it against the release's
+checksums.txt, and replaces the running bwt executable. Works on macOS, Linux, and Windows; on Windows
+the old executable is renamed to bwt.exe.old and deleted on a later run.
+
+Asks "Update now? [Y/n]" when stdin is a terminal; --yes skips the question, and --no-input requires
+--yes. --check only reports the current and latest versions. A bwt in a Go bin directory ($GOBIN,
+$GOPATH/bin, or ~/go/bin) is not replaced: rebuild it from your checkout instead. --read-only blocks
+installing but allows --check.
+
+Update notice: in an interactive terminal, bwt checks GitHub for a new release at most once a day and,
+after a command's output, prints a notice on stderr. It never checks when stderr is not a terminal, when
+CI is set, with --quiet, or when BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).
 
 ```text
 bwt update [flags]
 ```
 
+```bash
+  bwt update --check
+  bwt update
+  bwt update --yes --no-input
+```
+
 ```text
-      --check   Only check the latest published release
+      --check   Only report the current and latest versions (always queries GitHub)
 ```
 
 ## bwt url
@@ -1412,6 +1431,9 @@ bwt users remove EMAIL [flags]
 ## bwt version
 
 Print build information
+
+Prints the version, commit, and build date. latest and update_available come from the last
+release check (see bwt update --help) and appear only when one is cached; version never uses the network.
 
 ```text
 bwt version
