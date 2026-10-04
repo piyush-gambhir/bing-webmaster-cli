@@ -1,0 +1,72 @@
+---
+title: Quick start
+description: Log in, pick a site, and run your first Bing Webmaster Tools commands with bwt.
+---
+
+## 1. Log in
+
+```bash
+bwt auth login
+```
+
+`bwt` opens Bing Webmaster Tools. Under **Settings > API Access > API Key**, generate or copy your key
+and paste it at the hidden prompt. The key is checked, saved in your OS keychain, and your only site
+(or the one you pick) becomes the default.
+
+## 2. Check your sites
+
+```bash
+bwt sites list
+bwt sites use https://www.example.com/    # change the default site
+bwt auth status                           # the active credential and site
+```
+
+Use site URLs exactly as `sites list` prints them, with the scheme and trailing slash. `--site` (or
+`-s`) picks a site for one command, and a bare host such as `example.com` works when it matches one
+of your sites.
+
+## 3. Read your performance
+
+```bash
+bwt stats summary --compare previous         # the latest 28 days against the 28 before
+bwt stats queries --sort clicks --limit 20
+bwt stats pages --sort impressions --limit 20 -o csv > pages.csv
+```
+
+## 4. Check crawl health
+
+```bash
+bwt crawl stats
+bwt crawl issues
+bwt sitemaps list
+bwt quota
+```
+
+## 5. Tell search engines what changed
+
+```bash
+bwt submit urls https://www.example.com/new-page --dry-run   # see the request first
+bwt submit urls https://www.example.com/new-page
+
+bwt indexnow key generate      # then upload KEY.txt to your site's root
+bwt indexnow key check
+bwt indexnow submit https://www.example.com/new-page
+```
+
+<Callout type="info">
+  A new site, or one with little traffic, returns no performance or crawl rows for a while. `bwt` says
+  so on stderr rather than leaving you with an unexplained empty table.
+</Callout>
+
+## Discovering commands
+
+```bash
+bwt --help
+bwt stats --help
+bwt api methods      # every Bing method and the command that calls it
+```
+
+<Cards>
+  <Card title="Output formats" href="/docs/output-formats" description="Table, JSON, YAML, CSV, and the stdout and stderr contract." />
+  <Card title="Commands" href="/docs/commands" description="Every command group, with examples." />
+</Cards>

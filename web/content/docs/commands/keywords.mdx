@@ -1,0 +1,18 @@
+---
+title: Keyword research
+description: Look up Bing search demand for any query and market with bwt keyword research commands.
+---
+
+Keyword research reports Bing search demand for a query in a market. It is market data, not your
+site's performance, so it needs no `--site`.
+
+```bash
+bwt keywords get "running shoes"                              # impressions over a date range
+bwt keywords stats "running shoes"                            # weekly impression history
+bwt keywords related "running shoes" --country gb --language en-GB
+```
+
+`--country` (default `us`) and `--language` (default `en-US`) pick the market. `get` and `related`
+take `--start` and `--end` dates (`YYYY-MM-DD`); `--end` defaults to today (UTC) and `--start` to 30
+days before it. Microsoft does not document the accepted date syntax, so `bwt` sends `YYYY-MM-DD`,
+which works in live checks.

@@ -1,0 +1,48 @@
+---
+title: Reading the data
+description: What Bing Webmaster Tools data from bwt does and does not mean, so neither people nor agents draw the wrong conclusion.
+---
+
+Bing's API has gaps that are easy to misread. `bwt` is explicit about them, and this page explains
+why.
+
+## Performance data is Bing's top rows
+
+The `stats` methods return Bing's own selection of top rows. The API has no server-side date range,
+row limit, or paging.
+
+- `--since`, `--until`, `--limit`, and `--sort` filter and sort **locally**, and JSON output says so
+  with `filtered_locally: true`.
+- **Never add up query or page rows to get site totals.** Use `bwt stats summary`, which sums the daily
+  site traffic over a stated window and recomputes CTR from the sums.
+- Query and page statistics update **weekly**; site traffic and query traffic update **daily**.
+- Positions (`AvgClickPosition`, `AvgImpressionPosition`) are printed exactly as Bing returns them,
+  because Microsoft does not document their scale.
+- A new or low-traffic site returns no rows at all. That is missing data, not zero traffic.
+
+## Accepted is not indexed
+
+`bwt submit urls`, `bwt submit content`, and `bwt indexnow submit` report what Bing **received**. A
+`200` or `202` from IndexNow means the submission was accepted (`202`: the key is still being
+validated). None of them means the URL is, or will be, indexed.
+
+## There is no indexing verdict
+
+`bwt url info` shows crawl details: last crawl, discovery date, HTTP status, size, and child count.
+The API has no "indexed" field, and a zero status or `IsPage: false` describes crawling, not indexing.
+
+On a site without crawl data, the URL methods (`url info`, `url traffic`, `url children`) return
+Bing's `UnknownError`. Microsoft documents no cause, so treat it as "no answer", not "not indexed".
+
+## Empty is not healthy
+
+`bwt links` and `bwt crawl issues` can return empty lists for sites that do have links or issues.
+Fixed crawl issues can also stay listed for several days. `bwt` notes this on stderr; an empty result
+is not proof of anything.
+
+## Quotas belong to each site
+
+`bwt quota` shows Bing's daily and monthly counters exactly as returned. Every `submit urls` call
+spends quota, even for a URL you already submitted, so `bwt` never resubmits automatically. IndexNow
+has no Bing quota and reaches every participating search engine, so prefer it for new or changed
+URLs.

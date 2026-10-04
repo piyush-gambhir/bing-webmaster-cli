@@ -1,0 +1,11 @@
+{
+  "title": "Commands",
+  "pages": [
+    "index",
+    "performance",
+    "crawl-urls",
+    "submission",
+    "site-settings",
+    "keywords"
+  ]
+}

@@ -1,0 +1,42 @@
+---
+title: Search performance
+description: Read Bing search performance with bwt, including top queries and pages, traffic by day, drill-downs, and windowed summaries.
+---
+
+```bash
+bwt stats summary --compare previous             # totals for the latest 28 days, and the change
+bwt stats traffic --since 2026-09-01             # clicks and impressions by day
+bwt stats queries --sort clicks --limit 20       # top queries
+bwt stats pages --sort impressions --limit 20    # top pages
+```
+
+## Drill down
+
+```bash
+bwt stats query-pages "running shoes"                            # pages that rank for a query
+bwt stats page-queries https://www.example.com/shoes/            # queries that lead to a page
+bwt stats detail "running shoes" https://www.example.com/shoes/  # position detail for both
+bwt stats query-traffic "running shoes"                          # daily history for a top query
+```
+
+## Summaries
+
+`bwt stats summary` sums daily site traffic over the latest `--days` (default 28) calendar days that
+Bing returned and recomputes CTR from the sums. `--compare previous` adds the preceding window and the
+change; percentage changes are `null` when the earlier value is zero, and the CTR change is in
+percentage points.
+
+## Filtering and sorting
+
+`--since`, `--until`, `--limit`, `--sort`, and `--asc` work **locally**, because Bing's API has no date
+range or paging. Sort keys: `date`, `clicks`, `impressions`, `ctr`, `query`, `position`,
+`avg-click-position`, and `avg-impression-position`.
+
+```bash
+bwt stats queries --since 2026-09-01 --sort ctr --limit 10 -o json
+```
+
+<Callout type="warn">
+  These are Bing's top rows, not complete data. Never add query or page rows up into site totals; use
+  `stats summary`. See [Reading the data](/docs/data).
+</Callout>

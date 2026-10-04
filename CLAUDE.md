@@ -26,6 +26,8 @@ Use `bwt --help` and `docs/commands.md` for current flags; `bwt/SKILL.md` has op
 - Preserve stdout as command data and stderr as diagnostics. No automatic retries, no background calls.
 - Do not present performance rows as complete, submissions as indexed, or empty legacy results as healthy.
 - Tests use fake transports, temporary configs, and `keyring.MockInit()`; never the network or a real keychain.
-- Document user-visible changes in README.md, docs/, and `bwt/SKILL.md`.
+- Document user-visible changes in README.md, docs/, `bwt/SKILL.md`, and the guide pages in
+  `web/content/docs/`. The site's command reference and API coverage pages are generated from `docs/` by
+  `web/scripts/sync-reference.mjs`; never edit `web/content/docs/reference/` by hand (it is gitignored).
 - Releases: bump `cli-go/VERSION` in a pull request; merging to `main` tags and publishes it (see
   CONTRIBUTING.md). Never push release tags by hand. `main` requires pull requests and passing checks.

@@ -1,0 +1,77 @@
+---
+title: Output formats
+description: Table, JSON, YAML, and CSV output in bwt, the stdout and stderr contract, date handling, and structured errors.
+---
+
+## Formats
+
+`-o table` is the default. `-o json`, `-o yaml`, and `-o csv` are available on every command that
+returns data.
+
+```bash
+bwt sites list                        # table
+bwt stats queries -o json             # JSON for scripts and agents
+bwt stats pages -o csv > pages.csv    # spreadsheet-ready
+```
+
+## stdout and stderr
+
+Data goes to **stdout**. Notes, hints, and errors go to **stderr**, so piping stdout always gives you
+clean data. `--quiet` drops informational notes, and `--verbose` logs each request's method, redacted
+URL, and HTTP status to stderr.
+
+## JSON
+
+- **Bing's field names are kept** (`Url`, `Clicks`, `Impressions`, `DailyQuota`), so Bing's own
+  documentation still applies to the data.
+- **Most commands print Bing's data as it is:** an object, or a list such as `sites list`,
+  `sitemaps list`, and `crawl issues`.
+- **Commands that filter, page, or compute add an envelope**, with the CLI's own fields in snake_case.
+  The `stats` listings say where the rows came from and whether anything was filtered locally:
+
+```json
+{
+  "site": "https://www.example.com/",
+  "method": "GetQueryStats",
+  "update_cadence": "weekly",
+  "filtered_locally": true,
+  "row_count": 20,
+  "rows": [{ "Query": "example", "Clicks": 12, "Impressions": 340 }]
+}
+```
+
+  Paged listings (`url children`, `url children-traffic`, `links counts`, `links list`) use `site`,
+  `method`, `pages_fetched`, `complete`, `row_count`, and `rows`. `stats summary` reports `window_days`,
+  `current`, and with `--compare`, `previous` and `change`.
+
+- **Dates become RFC 3339.** Bing sends Microsoft JSON dates such as `/Date(1315349995284-0700)/`;
+  `bwt` prints `2011-09-06T15:59:55.284-07:00`, keeping Bing's offset.
+- **Bing's `__type` metadata is removed.** `--raw` prints Bing's wire JSON exactly as received.
+
+## Errors
+
+Every failure exits with status `1`. With `-o json` or `-o yaml`, stderr carries a structured error:
+
+```json
+{
+  "api_error_code": 3,
+  "api_error_name": "InvalidApiKey",
+  "error": "Bing GetUserSites failed: InvalidApiKey (code 3, HTTP 400): the API key is invalid; ...",
+  "http_status": 400,
+  "method": "GetUserSites"
+}
+```
+
+`retry_after` is added when Bing sends a `Retry-After` header. The error text includes a hint for the
+common cases:
+
+| `api_error_name` | Meaning |
+| --- | --- |
+| `InvalidApiKey` | The key is wrong, regenerated, or not active yet; run `bwt auth login` |
+| `NotAuthorized` | The site URL does not match `bwt sites list` exactly, or your account lacks access |
+| `InvalidUrl`, `InvalidParameter` | Bing rejected a URL or value; check the scheme, trailing slash, and casing |
+| `ThrottleUser`, `ThrottleHost` | Bing is rate limiting; wait. `bwt` never retries automatically |
+| `UnknownError` | Bing gave no reason. Seen on URL methods for sites without crawl data; never read it as "not indexed" |
+| `NotFound`, `AlreadyExists` | The item is missing, or already there |
+
+API keys and bearer tokens never appear in errors or logs.

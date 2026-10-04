@@ -1,0 +1,58 @@
+---
+title: Overview
+description: The bwt command surface grouped by area, with the global flags every command accepts.
+---
+
+Every command has `-h`/`--help`, and every command that returns data accepts `-o json|yaml|csv`. The
+[command reference](/docs/reference/commands) lists every flag; these pages show how the groups fit
+together.
+
+## Groups
+
+<Cards>
+  <Card title="Search performance" href="/docs/commands/performance" description="Top queries and pages, traffic by day, drill-downs, and summaries." />
+  <Card title="Crawl & URLs" href="/docs/commands/crawl-urls" description="Crawl stats and issues, URL details, inbound links, and Fetch as Bingbot." />
+  <Card title="Submission & IndexNow" href="/docs/commands/submission" description="URLs, page content, sitemaps, quota, and IndexNow." />
+  <Card title="Site settings" href="/docs/commands/site-settings" description="Sites, users, parameters, blocks, geo-targeting, and crawl rate." />
+  <Card title="Keyword research" href="/docs/commands/keywords" description="Search demand for any query and market." />
+</Cards>
+
+## Global flags
+
+| Flag | Effect |
+| --- | --- |
+| `-s`, `--site` | Site URL exactly as in `sites list`, or a bare host (or `BWT_SITE`) |
+| `--profile` | Saved profile (or `BWT_PROFILE`) |
+| `-o`, `--output` | `table` (default), `json`, `yaml`, or `csv` |
+| `--read-only` | Block remote writes, local credential changes, and self-update |
+| `--dry-run` | For writes: print the requests and send nothing |
+| `--yes` | Confirm destructive commands without a prompt |
+| `--no-input` | Never prompt or open a browser |
+| `--raw` | Print Bing's wire JSON without date conversion |
+| `-q`, `--quiet` / `-v`, `--verbose` | Fewer notes, or a log line per request, on stderr |
+| `--timeout` | HTTP request timeout (default `30s`) |
+| `--api-key`, `--access-token` | Credential overrides; prefer `BWT_API_KEY` or `bwt auth login` |
+
+## Account and setup
+
+```bash
+bwt auth status                                   # also: login, list, use, logout
+bwt doctor --verify                               # local checks plus one GetUserSites call
+bwt update --check
+bwt completion zsh > "${fpath[1]}/_bwt"
+```
+
+## Any Bing method
+
+`bwt api` calls a Bing Webmaster method directly, with the same redaction, error handling, and date
+conversion as every other command:
+
+```bash
+bwt api methods -o json                                           # every method and its command
+bwt api GetUserSites
+bwt api GetQueryStats --param siteUrl=https://www.example.com/
+bwt api SubmitUrlBatch --data '{"siteUrl":"https://www.example.com/","urlList":["https://www.example.com/a"]}'
+```
+
+Known methods use their documented HTTP verb and read/write effect. Writes ask for confirmation, and
+`--read-only` refuses them.

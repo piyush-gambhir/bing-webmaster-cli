@@ -8,7 +8,7 @@ The registry is checked against the pinned documentation snapshot described in [
 62 methods, of which 57 are implemented, 2 are implemented as experimental, and 3 are never implemented.
 
 Effect is behavior, not HTTP verb: `read` methods are allowed under `--read-only`; `write` methods are blocked.
-Experimental commands print a notice on every run: Bing still documents them, but they failed a live check.
+Experimental commands print a notice on every run: Bing still documents them, but a live check failed (GetSiteMoves returned HTTP 404).
 
 ## Sites
 

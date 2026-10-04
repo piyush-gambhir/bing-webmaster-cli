@@ -1,0 +1,60 @@
+---
+title: Installation
+description: Install Bing Webmaster CLI (bwt) from a checksum-verified prebuilt binary or build it from source.
+---
+
+## Install script (recommended)
+
+For macOS and Linux. The script downloads the latest release for your OS and architecture, checks its
+SHA-256 checksum, and installs `bwt` to `~/.local/bin`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/piyush-gambhir/bing-webmaster-cli/main/install.sh | sh
+```
+
+Pin a version or change the install directory:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/piyush-gambhir/bing-webmaster-cli/main/install.sh | VERSION=v0.1.2 sh
+curl -fsSL https://raw.githubusercontent.com/piyush-gambhir/bing-webmaster-cli/main/install.sh | INSTALL_DIR=/usr/local/bin sh
+```
+
+<Callout type="warn">
+  Another program, Bitcoin Wallet Tracker, also installs a binary named `bwt`. The installer warns when a
+  different `bwt` comes first on your `PATH`, and `bwt doctor` checks for it too.
+</Callout>
+
+## Download a release manually
+
+Each [GitHub release](https://github.com/piyush-gambhir/bing-webmaster-cli/releases) has
+`bing-webmaster-cli_<os>_<arch>.tar.gz` archives for `darwin` and `linux` (`amd64` or `arm64`) and
+`bing-webmaster-cli_windows_<arch>.zip` for Windows. Extract `bwt` and put it on your `PATH`.
+`checksums.txt` lists the SHA-256 of every archive.
+
+## Verify a download
+
+Releases are immutable once published. Every archive ships with an SBOM and a signed build-provenance
+attestation, so you can confirm it was built by the repository's release workflow:
+
+```bash
+gh attestation verify bing-webmaster-cli_darwin_arm64.tar.gz --repo piyush-gambhir/bing-webmaster-cli
+```
+
+## Build from source
+
+Requires Go 1.26 or later:
+
+```bash
+git clone https://github.com/piyush-gambhir/bing-webmaster-cli.git
+cd bing-webmaster-cli/cli-go
+make install    # installs to $(go env GOPATH)/bin
+```
+
+## Check and update
+
+```bash
+bwt version
+bwt doctor              # configuration, credentials, default site, and PATH; no network
+bwt update --check      # is a newer release out?
+bwt update              # install it after SHA-256 verification
+```
