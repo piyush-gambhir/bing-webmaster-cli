@@ -122,8 +122,9 @@ func TestExtractRefusesTraversalAndNonRegularEntries(t *testing.T) {
 func releaseServer(t *testing.T, tag, asset string, archive []byte, checksums string) Source {
 	t.Helper()
 	mux := http.NewServeMux()
-	mux.HandleFunc("/repos/"+Repo+"/releases/latest", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"tag_name":%q,"html_url":"https://example.invalid/ignored"}`, tag)
+	var srv *httptest.Server
+	mux.HandleFunc("/"+Repo+"/releases/latest", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, srv.URL+"/"+Repo+"/releases/tag/"+tag, http.StatusFound)
 	})
 	mux.HandleFunc("/"+Repo+"/releases/download/"+tag+"/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, checksums)
@@ -131,9 +132,9 @@ func releaseServer(t *testing.T, tag, asset string, archive []byte, checksums st
 	mux.HandleFunc("/"+Repo+"/releases/download/"+tag+"/"+asset, func(w http.ResponseWriter, r *http.Request) {
 		w.Write(archive)
 	})
-	srv := httptest.NewServer(mux)
+	srv = httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
-	return Source{API: srv.URL, Download: srv.URL}
+	return Source{Download: srv.URL}
 }
 
 func TestFetchVerifiesTheReleaseBeforeExtracting(t *testing.T) {
@@ -167,16 +168,63 @@ func TestFetchVerifiesTheReleaseBeforeExtracting(t *testing.T) {
 	if bin, err := win.Fetch(context.Background(), r, "windows", "amd64"); err != nil || string(bin) != "new exe" {
 		t.Fatalf("windows fetch %q %v", bin, err)
 	}
+}
 
-	for _, tag := range []string{"0.2.0", "v0.2", "v0.2.0/../../x", "dev"} {
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintf(w, `{"tag_name":%q}`, tag)
-		}))
-		_, err := Source{API: srv.URL}.Latest(context.Background())
-		srv.Close()
-		if err == nil {
-			t.Errorf("accepted release tag %q", tag)
+// TestLatestReadsTheRedirect covers the github.com/<repo>/releases/latest
+// lookup: only a 302 to this repo's semver release tag is accepted, and the
+// redirect is never followed.
+func TestLatestReadsTheRedirect(t *testing.T) {
+	followed := 0
+	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { followed++ }))
+	defer other.Close()
+	var location string
+	status := http.StatusFound
+	var srv *httptest.Server
+	srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/"+Repo+"/releases/latest" {
+			followed++
+			return
 		}
+		if location != "" {
+			w.Header().Set("Location", strings.ReplaceAll(location, "SELF", srv.URL))
+		}
+		w.WriteHeader(status)
+	}))
+	defer srv.Close()
+	src := Source{Download: srv.URL}
+
+	location = "SELF/" + Repo + "/releases/tag/v0.2.0"
+	r, err := src.Latest(context.Background())
+	if err != nil || r.Tag != "v0.2.0" || r.URL != "https://github.com/"+Repo+"/releases/tag/v0.2.0" {
+		t.Fatalf("latest %+v %v", r, err)
+	}
+
+	for name, c := range map[string]struct {
+		status   int
+		location string
+	}{
+		"missing Location":   {http.StatusFound, ""},
+		"foreign host":       {http.StatusFound, other.URL + "/" + Repo + "/releases/tag/v0.2.0"},
+		"other scheme":       {http.StatusFound, "ftp" + strings.TrimPrefix(srv.URL, "http") + "/" + Repo + "/releases/tag/v0.2.0"},
+		"relative":           {http.StatusFound, "/" + Repo + "/releases/tag/v0.2.0"},
+		"other repo":         {http.StatusFound, "SELF/someone/else/releases/tag/v0.2.0"},
+		"no releases":        {http.StatusFound, "SELF/" + Repo + "/releases"},
+		"no v":               {http.StatusFound, "SELF/" + Repo + "/releases/tag/0.2.0"},
+		"not semver":         {http.StatusFound, "SELF/" + Repo + "/releases/tag/v0.2"},
+		"dev":                {http.StatusFound, "SELF/" + Repo + "/releases/tag/dev"},
+		"path traversal":     {http.StatusFound, "SELF/" + Repo + "/releases/tag/v0.2.0/../../x"},
+		"escaped slash":      {http.StatusFound, "SELF/" + Repo + "/releases/tag/v0.2.0%2Fx"},
+		"rate limited":       {http.StatusForbidden, ""},
+		"200 instead of 302": {http.StatusOK, "SELF/" + Repo + "/releases/tag/v0.2.0"},
+		"permanent redirect": {http.StatusMovedPermanently, "SELF/" + Repo + "/releases/tag/v0.2.0"},
+	} {
+		status, location = c.status, c.location
+		if r, err := src.Latest(context.Background()); err == nil || !strings.HasPrefix(err.Error(), "checking the latest release: ") {
+			t.Errorf("%s: accepted %+v (%v)", name, r, err)
+		}
+	}
+	if followed != 0 {
+		t.Fatalf("followed the redirect %d times", followed)
 	}
 }
 

@@ -50,8 +50,9 @@ renamed to `bwt.exe.old` and deleted on a later run). `--yes` skips the question
 Go bin directory (`$GOBIN`, `$GOPATH/bin`, `~/go/bin`) came from a source build, so `bwt update` tells you to
 run `git pull && make install` in your checkout instead of replacing it.
 
-In an interactive terminal, `bwt` checks GitHub for a new release at most once a day and, after a command's
-output, prints a notice on stderr:
+In an interactive terminal, `bwt` checks the github.com release page for a new release at most once a day
+(not the GitHub API, so its per-IP rate limit never breaks the check on shared networks) and, after a
+command's output, prints a notice on stderr:
 
 ```text
 A new version of bwt is available: v0.1.3 -> v0.1.4

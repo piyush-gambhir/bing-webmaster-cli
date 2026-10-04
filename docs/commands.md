@@ -1281,9 +1281,10 @@ Asks "Update now? [Y/n]" when stdin is a terminal; --yes skips the question, and
 $GOPATH/bin, or ~/go/bin) is not replaced: rebuild it from your checkout instead. --read-only blocks
 installing but allows --check.
 
-Update notice: in an interactive terminal, bwt checks GitHub for a new release at most once a day and,
-after a command's output, prints a notice on stderr. It never checks when stderr is not a terminal, when
-CI is set, with --quiet, or when BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).
+Update notice: in an interactive terminal, bwt checks the github.com releases page (not the GitHub API,
+so its rate limit never applies) for a new release at most once a day and, after a command's output,
+prints a notice on stderr. It never checks when stderr is not a terminal, when CI is set, with --quiet,
+or when BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).
 
 ```text
 bwt update [flags]
@@ -1296,7 +1297,7 @@ bwt update [flags]
 ```
 
 ```text
-      --check   Only report the current and latest versions (always queries GitHub)
+      --check   Only report the current and latest versions (always checks the github.com releases page)
 ```
 
 ## bwt url

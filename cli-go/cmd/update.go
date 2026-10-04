@@ -28,9 +28,10 @@ func (a *app) updateCmd() *cobra.Command {
 			"--yes. --check only reports the current and latest versions. A bwt in a Go bin directory ($GOBIN,\n" +
 			"$GOPATH/bin, or ~/go/bin) is not replaced: rebuild it from your checkout instead. --read-only blocks\n" +
 			"installing but allows --check.\n\n" +
-			"Update notice: in an interactive terminal, bwt checks GitHub for a new release at most once a day and,\n" +
-			"after a command's output, prints a notice on stderr. It never checks when stderr is not a terminal, when\n" +
-			"CI is set, with --quiet, or when BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).",
+			"Update notice: in an interactive terminal, bwt checks the github.com releases page (not the GitHub API,\n" +
+			"so its rate limit never applies) for a new release at most once a day and, after a command's output,\n" +
+			"prints a notice on stderr. It never checks when stderr is not a terminal, when CI is set, with --quiet,\n" +
+			"or when BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).",
 		Example: "  bwt update --check\n  bwt update\n  bwt update --yes --no-input",
 		Args:    cobra.NoArgs, Annotations: map[string]string{"self-update": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -103,7 +104,7 @@ func (a *app) updateCmd() *cobra.Command {
 			result["updated"] = true
 			return a.updateResult(result, fmt.Sprintf("Updated bwt %s -> %s\nRelease notes: %s", from, to, r.URL))
 		}}
-	c.Flags().BoolVar(&check, "check", false, "Only report the current and latest versions (always queries GitHub)")
+	c.Flags().BoolVar(&check, "check", false, "Only report the current and latest versions (always checks the github.com releases page)")
 	return c
 }
 
