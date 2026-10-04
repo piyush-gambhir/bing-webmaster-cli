@@ -8,6 +8,9 @@ stable JSON (plus table, YAML, and CSV), an effect-based `--read-only` mode, dry
 cross-platform binary. Covers all 59 non-obsolete methods of the Bing Webmaster JSON API plus IndexNow, checked
 end to end against a live account. Independent project; not affiliated with Microsoft.
 
+**Docs:** [projects.piyushgambhir.com/bing-webmaster-cli](https://projects.piyushgambhir.com/bing-webmaster-cli)
+([llms.txt](https://projects.piyushgambhir.com/bing-webmaster-cli/llms.txt) for agents)
+
 [![CI](https://github.com/piyush-gambhir/bing-webmaster-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/piyush-gambhir/bing-webmaster-cli/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/piyush-gambhir/bing-webmaster-cli)](https://github.com/piyush-gambhir/bing-webmaster-cli/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -155,6 +158,10 @@ make vet
 make build
 make docs     # regenerates docs/commands.md and docs/api-coverage.md
 ```
+
+The docs site lives in `web/` (Next.js and Fumadocs, exported as static files). Its command reference and API
+coverage pages are generated from `docs/` at build time. `cd web && pnpm install && pnpm dev` runs it locally;
+`scripts/deploy-docs.sh` deploys it.
 
 The API snapshot the registry is tested against, and how to refresh it, is in
 [docs/compatibility.md](docs/compatibility.md). Design notes: [PLAN.md](PLAN.md). Upstream facts and

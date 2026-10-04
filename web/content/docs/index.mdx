@@ -1,0 +1,48 @@
+---
+title: Introduction
+description: Meet Bing Webmaster CLI (bwt), an independent, unofficial open-source CLI for Bing Webmaster Tools, built for coding agents and people.
+---
+
+**Bing Webmaster CLI** (`bwt`) is a command-line interface for **Bing Webmaster Tools**. Read search
+performance and crawl health, submit URLs, sitemaps, and page content, notify search engines with
+IndexNow, and manage site settings from your terminal.
+
+It is built mainly for coding agents and works just as well at the keyboard. Every command can print
+JSON, writes can be previewed with `--dry-run`, and `--read-only` blocks every change.
+
+<Callout type="info">
+  The binary is `bwt`. One Bing Webmaster API key covers every site in your account, and
+  `bwt auth login` keeps it in your OS keychain.
+</Callout>
+
+## What it covers
+
+- **Search performance:** top queries and pages, clicks and impressions by day, query and page
+  drill-downs, and a summary over a stated window.
+- **Crawl health:** daily crawl stats, crawl issues with the bitmask decoded, crawl rate and boost,
+  URL details, inbound links, and Fetch as Bingbot.
+- **Submission:** URLs (one at a time or batched), full page content, sitemaps and feeds, and quota.
+- **IndexNow:** key generation and checks, and submissions from arguments, a file, or a sitemap
+  filtered by date.
+- **Site settings:** sites and verification, users and roles, URL parameters, blocked URLs, preview
+  blocks, geo-targeting, and deep-link blocks.
+- **Keyword research:** impressions, weekly history, and related queries for any market.
+- **Anything else:** `bwt api` calls any Bing Webmaster method directly, and `bwt api methods` lists
+  every method with its read or write effect.
+
+Each of the 59 current methods in the Bing Webmaster JSON API has a command. The
+[API coverage](/docs/reference/api-coverage) page maps them one by one.
+
+## Next steps
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" description="Install the prebuilt binary or build from source." />
+  <Card title="Authentication" href="/docs/authentication" description="Log in with your API key, or use one without saving it." />
+  <Card title="Quick start" href="/docs/quickstart" description="Pick a site and run your first commands." />
+  <Card title="Agents" href="/docs/agents" description="JSON output, structured errors, and safety flags." />
+</Cards>
+
+<Callout type="info">
+  **Independent project.** Not affiliated with, endorsed by, or sponsored by Microsoft. Bing and Bing
+  Webmaster Tools are trademarks of Microsoft, named here only to identify the service this tool works with.
+</Callout>

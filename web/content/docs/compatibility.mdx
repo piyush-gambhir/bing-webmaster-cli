@@ -1,0 +1,49 @@
+---
+title: Compatibility
+description: The Bing Webmaster API snapshot bwt is tested against, live-check results, and known Bing quirks.
+---
+
+`bwt` targets the Bing Webmaster **JSON** API at `https://ssl.bing.com/webmaster/api.svc/json/`, as
+documented on Microsoft Learn, plus the IndexNow protocol.
+
+## Pinned documentation snapshot
+
+The method registry is tested against a snapshot of Microsoft's reference, captured on 2026-10-03:
+62 methods (35 GET, 27 POST). Three are marked obsolete by Microsoft and are never called
+(`GetDeepLink`, `GetDeepLinkAlgoUrls`, `UpdateDeepLink`). The other 59 each have a command. The two
+site-move methods live under `bwt experimental`: `GetSiteMoves` returned HTTP 404 in a live check, and
+`SubmitSiteMove` was only checked with `--dry-run`.
+
+Tests fail when the registry drifts from the snapshot, when a method has no command, or when a
+command's read/write classification disagrees with the registry. The
+[API coverage](/docs/reference/api-coverage) page lists every method, and the
+[compatibility record](https://github.com/piyush-gambhir/bing-webmaster-cli/blob/main/docs/compatibility.md)
+has the exact documentation commits and how to refresh them.
+
+Legacy SOAP and POX endpoints were retired on August 31, 2026. `bwt` never used them.
+
+## Live checks (2026-10-04)
+
+Commands were run against a real account with an API key. Reads ran under `--read-only`, writes were
+limited to reversible ones on a test page or a throwaway test site, and every change was undone.
+Commands with outside effects (`users add`, `users remove`, `connected-pages add`, `sitemaps remove`, and
+`experimental site-move submit`) were checked with `--dry-run` only.
+
+| Area | Result |
+| --- | --- |
+| Login, sites, sitemaps, quota, crawl settings, keywords, users, fetch, URL parameters, blocks, preview blocks | Working |
+| `submit urls` and `submit content` | Working with an API key, and counted against the URL and content quotas |
+| Geo-targeting | Needs a lowercase country code (`us`); `bwt` lowercases it for you |
+| Deep-link blocks | Need a lowercase market (`en-us`); `bwt` lowercases it for you |
+| IndexNow | `api.indexnow.org` accepted submissions |
+| Performance and crawl stats | Empty for a site with little traffic; not an error |
+| `url info`, `url traffic`, `url children` | `UnknownError` on a site without crawl data, also when called directly; cause undocumented |
+| Site moves (`GetSiteMoves`) | HTTP 404; kept under `bwt experimental` |
+
+Still unsettled, because the test site had little data: the scale of the position fields, whether
+performance dates mark days or weekly buckets, and the URL information methods on a crawled site.
+
+## Platforms
+
+Prebuilt binaries for macOS, Linux, and Windows on `amd64` and `arm64`. CI runs the tests on all three
+operating systems.

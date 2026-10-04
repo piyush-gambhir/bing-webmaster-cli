@@ -57,7 +57,7 @@ func newRoot(a *app) *cobra.Command {
 				return fmt.Errorf("%s changes local state and is blocked by --read-only", cmd.CommandPath())
 			}
 			if cmd.Annotations["experimental"] == "true" {
-				a.info("Experimental: Bing documents this method, but it failed a live check (HTTP 404 on 2026-10-04). Check the result in the Bing Webmaster Tools dashboard.")
+				a.info("Experimental: Bing documents site moves, but GetSiteMoves returned HTTP 404 in a live check on 2026-10-04. Check the result in the Bing Webmaster Tools dashboard.")
 			}
 			return nil
 		},

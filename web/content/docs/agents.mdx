@@ -1,0 +1,68 @@
+---
+title: Agents
+description: Run bwt from coding agents with JSON output, structured errors, read-only mode, dry runs, and capability discovery.
+---
+
+`bwt` is built mainly for coding agents. Any agent or harness that can run shell commands can use it;
+nothing else is needed.
+
+## Ground rules
+
+- Run commands with `-o json --no-input`. Data is on stdout; notes and structured errors are on stderr.
+- Use `--read-only` unless the user asked for a change. It blocks every command that changes Bing state,
+  local credentials, or the binary itself.
+- Run writes with `--dry-run` first and show the plan. Destructive commands (remove, block) also need
+  `--yes` under `--no-input`; pass it only when the user asked for that exact change.
+- Never invent, print, or log an API key. If `bwt auth status -o json` fails, ask the user to run
+  `bwt auth login` or to set `BWT_API_KEY`.
+
+```bash
+# A safe, non-interactive read for an agent
+bwt --read-only stats queries --sort clicks --limit 20 -o json --no-input
+```
+
+## Discover capabilities
+
+```bash
+bwt api methods -o json
+```
+
+Lists every Bing Webmaster method with its HTTP verb, `read` or `write` effect, status
+(`implemented`, `experimental`, or `obsolete`), and the commands that call it. Read/write effects come
+from a registry, not from the HTTP verb: `url children` is a read even though Bing implements it with
+POST, so it works under `--read-only`.
+
+For anything without a dedicated command, `bwt api METHOD` calls the method directly with the same
+redaction, error handling, and date conversion. Unknown methods count as writes.
+
+## Automation flags
+
+| Flag | Environment | Effect |
+| --- | --- | --- |
+| `--read-only` | `BWT_READ_ONLY=1` | Blocks remote writes, credential changes, and self-update |
+| `--no-input` | `BWT_NO_INPUT=1` | Never prompts or opens a browser; commands fail instead |
+| `--dry-run` | | Prints every write request, including each batch, and sends nothing |
+| `--yes` | | Confirms destructive commands without a prompt |
+| `--quiet` | `BWT_QUIET=1` | Drops informational notes from stderr |
+| `--verbose` | `BWT_VERBOSE=1` | Logs method, redacted URL, and status to stderr |
+| `--site` | `BWT_SITE` | Site for this command |
+| `--profile` | `BWT_PROFILE` | Saved profile for this command |
+
+## Reporting results honestly
+
+- Performance rows are Bing's top rows; never sum them into site totals. Use `bwt stats summary`.
+- Never call a submission "indexed". `submit` and `indexnow submit` report what Bing accepted.
+- An empty `links` or `crawl issues` result is not proof of health; say so.
+- `UnknownError` on URL methods means Bing gave no reason, not that the URL is missing from the index.
+- `ThrottleUser` and `ThrottleHost` mean stop; do not retry in a loop.
+
+[Reading the data](/docs/data) covers each of these in detail.
+
+## Agent skill and LLM files
+
+- The agent skill lives at
+  [`bwt/SKILL.md`](https://github.com/piyush-gambhir/bing-webmaster-cli/blob/main/bwt/SKILL.md).
+  Copy it into your agent's skills directory.
+- [`llms.txt`](https://projects.piyushgambhir.com/bing-webmaster-cli/llms.txt) indexes these docs,
+  and [`llms-full.txt`](https://projects.piyushgambhir.com/bing-webmaster-cli/llms-full.txt) contains
+  all of them, including the full command reference.

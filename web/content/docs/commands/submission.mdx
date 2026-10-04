@@ -1,0 +1,65 @@
+---
+title: Submission & IndexNow
+description: Submit URLs, page content, and sitemaps to Bing, check quota, and notify search engines with IndexNow using bwt.
+---
+
+## IndexNow (preferred)
+
+IndexNow tells Bing and the other participating search engines about new, changed, or deleted URLs. It
+needs no Bing login and spends no Bing quota; you prove ownership by hosting a key file.
+
+```bash
+bwt indexnow key generate     # creates a key for your site's host and saves it
+# upload KEY.txt, containing only the key, to https://www.example.com/KEY.txt
+bwt indexnow key check        # fetches the key file and confirms it matches
+```
+
+`key generate` and `key check` follow your site's redirect between `example.com` and
+`www.example.com`, so the key lands on the host that serves your pages. Pass `--host` to choose one.
+
+```bash
+bwt indexnow submit https://www.example.com/new-post
+bwt indexnow submit --file changed.txt
+bwt indexnow submit --sitemap https://www.example.com/sitemap.xml --changed-since 2026-10-01
+```
+
+URLs are grouped by host and sent up to 10,000 per request. `--endpoint` picks `indexnow`
+(`api.indexnow.org`, the default), `bing`, or any HTTPS endpoint; one submission reaches every
+participating engine. `200` and `202` mean received (`202`: key validation pending), not indexed.
+
+## URL submission
+
+```bash
+bwt quota                                                  # remaining daily and monthly quota
+bwt submit urls https://www.example.com/new-page --dry-run
+bwt submit urls https://www.example.com/new-page
+bwt submit urls --file urls.txt --check-quota              # batches of up to 500
+```
+
+On a failure, `submit urls` reports the batches Bing accepted and stops. It never resubmits, because
+every submission spends quota, even for the same URL.
+
+## Content submission
+
+Push a page's full HTTP response so Bing can index it without crawling:
+
+```bash
+curl -s --http1.1 -i https://www.example.com/ -o home.http
+bwt submit content https://www.example.com/ --file home.http
+```
+
+The file holds the status line, headers, a blank line, and the body, up to 10 MB. Add
+`--structured-data` for a JSON-LD file and `--dynamic-serving` for device-specific pages. It works with
+an API key and spends the separate content quota. Submitted content can be indexed even when
+`robots.txt` disallows the URL; `NOINDEX` is honored.
+
+## Sitemaps
+
+```bash
+bwt sitemaps list
+bwt sitemaps submit https://www.example.com/sitemap.xml
+bwt sitemaps get https://www.example.com/sitemap_index.xml     # sitemaps inside an index
+bwt sitemaps remove https://www.example.com/old-sitemap.xml
+```
+
+XML sitemaps, sitemap indexes, RSS 2.0, Atom 0.3 and 1.0, and text feeds are supported.

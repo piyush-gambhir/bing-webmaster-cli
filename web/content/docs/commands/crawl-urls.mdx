@@ -1,0 +1,51 @@
+---
+title: Crawl & URLs
+description: Check crawl stats, crawl issues, URL details, inbound links, and Fetch as Bingbot with bwt.
+---
+
+## Crawl
+
+```bash
+bwt crawl stats       # daily crawled pages, index counts, errors, and HTTP status classes
+bwt crawl issues      # URLs Bing had trouble crawling, with the issue bitmask decoded
+bwt crawl settings    # hourly crawl rate and crawl boost
+```
+
+`crawl issues` adds `issue_labels`, decoded locally from Bing's `Issues` bitmask. To change the crawl
+rate or boost, see [Site settings](/docs/commands/site-settings#crawl-rate-and-boost).
+
+## URLs
+
+```bash
+bwt url info https://www.example.com/page             # last crawl, discovery, status, size
+bwt url traffic https://www.example.com/page          # clicks and impressions
+bwt url children https://www.example.com/blog/ --http 4xx,5xx --all
+bwt url children-traffic https://www.example.com/blog/
+```
+
+`url children` filters by `--http`, `--crawl-date`, `--discovered`, and `--doc-flags`. Pages start at
+0, and `--all` continues until Bing returns an empty page, bounded by `--max-pages` (default 100).
+
+## Inbound links
+
+```bash
+bwt links counts --all                            # pages with inbound link counts
+bwt links list https://www.example.com/ --all     # links to one page, with anchor text
+```
+
+## Fetch as Bingbot
+
+```bash
+bwt fetch request https://www.example.com/new-page    # ask Bingbot to fetch it
+bwt fetch list                                        # requests and whether they finished
+bwt fetch get https://www.example.com/new-page --save fetched.txt
+```
+
+`fetch get` shows the status in a table; `--save` writes what Bingbot fetched (its crawl record and the
+response) to a file, and `-o json` includes it too.
+
+<Callout type="info">
+  `url info` has no "indexed" field, and empty `links` or `crawl issues` results are not proof of
+  health. On a site without crawl data, the URL methods return `UnknownError`. See
+  [Reading the data](/docs/data).
+</Callout>
