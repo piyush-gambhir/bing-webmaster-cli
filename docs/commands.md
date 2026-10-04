@@ -465,12 +465,21 @@ bwt fetch
 
 Show a fetched URL's status, headers, and document
 
-The table shows the status; use -o json for the response headers and document.
+The table shows the status. --save writes what Bingbot fetched (its crawl record and the response) to a
+file; -o json includes it too.
 
 Bing methods: GetFetchedUrlDetails.
 
 ```text
-bwt fetch get URL
+bwt fetch get URL [flags]
+```
+
+```bash
+  bwt fetch get https://www.example.com/ --save fetched.txt
+```
+
+```text
+      --save string   Write the fetched document to this file
 ```
 
 ## bwt fetch list

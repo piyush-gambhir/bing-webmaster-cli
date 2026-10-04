@@ -46,6 +46,38 @@ func ValidKey(k string) bool { return keyPattern.MatchString(k) }
 
 func DefaultKeyLocation(host, key string) string { return "https://" + host + "/" + key + ".txt" }
 
+// CanonicalHost requests https://host/ and returns the host the site finally
+// serves pages from, so a site registered as example.com but served from
+// www.example.com gets its key on the host that appears in submitted URLs. Only
+// a www. variant of the same host is accepted; other redirects are ignored.
+func CanonicalHost(ctx context.Context, h *http.Client, host string) (string, error) {
+	c := *h
+	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		if len(via) >= 5 {
+			return errors.New("too many redirects")
+		}
+		return nil
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://"+host+"/", nil)
+	if err != nil {
+		return host, err
+	}
+	res, err := c.Do(req)
+	if err != nil {
+		return host, err
+	}
+	defer res.Body.Close()
+	_, _ = io.Copy(io.Discard, io.LimitReader(res.Body, 1<<16))
+	final := strings.ToLower(res.Request.URL.Hostname())
+	if final == "" || final == host {
+		return host, nil
+	}
+	if final == "www."+host || host == "www."+final {
+		return final, nil
+	}
+	return host, nil
+}
+
 // HostOf returns the lowercased host of an absolute http(s) URL.
 func HostOf(raw string) (string, error) {
 	u, err := url.Parse(raw)

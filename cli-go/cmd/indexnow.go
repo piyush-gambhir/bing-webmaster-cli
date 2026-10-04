@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -46,6 +47,21 @@ func (a *app) defaultHost() string {
 	return ""
 }
 
+// servingHost is the selected site's host, switched to its www (or non-www)
+// variant when the site redirects there, because IndexNow keys must live on the
+// host that serves the submitted URLs.
+func (a *app) servingHost(ctx context.Context) string {
+	host := a.defaultHost()
+	if host == "" {
+		return ""
+	}
+	if final, err := indexnow.CanonicalHost(ctx, a.webClient(), host); err == nil && final != host {
+		a.info("%s redirects to %s; using %s for IndexNow (pass --host to choose another).", host, final, final)
+		return final
+	}
+	return host
+}
+
 func (a *app) profileForWrite(cfg *config.Config) string {
 	if name := cfg.ProfileName(a.profile); name != "" {
 		return name
@@ -65,7 +81,7 @@ func (a *app) indexnowGenerateCmd() *cobra.Command {
 	c.Flags().BoolVar(&noSave, "no-save", false, "Print the key without saving it")
 	c.RunE = func(cmd *cobra.Command, args []string) error {
 		if host == "" {
-			host = a.defaultHost()
+			host = a.servingHost(cmd.Context())
 		}
 		if host == "" {
 			return fmt.Errorf("pass --host or select a site")
@@ -151,7 +167,7 @@ func (a *app) indexnowCheckCmd() *cobra.Command {
 	c.Flags().StringVar(&flagLocation, "key-location", "", "Key file URL (default: https://host/KEY.txt)")
 	c.RunE = func(cmd *cobra.Command, args []string) error {
 		if host == "" {
-			host = a.defaultHost()
+			host = a.servingHost(cmd.Context())
 		}
 		if host == "" {
 			return fmt.Errorf("pass --host or select a site")

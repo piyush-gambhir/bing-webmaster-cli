@@ -27,6 +27,8 @@ type opSpec struct {
 	validate func([]string) error
 	// domainOK also accepts Bing's documented domain:example.com form for "url".
 	domainOK bool
+	// onResult, when set, sees a successful read result before it is printed.
+	onResult func(any) error
 }
 
 // annotate records the Bing methods a command calls; mutates and experimental
@@ -121,6 +123,11 @@ func (a *app) opCmd(s opSpec) *cobra.Command {
 		result, err := cl.Call(cmd.Context(), s.op, params)
 		if err != nil {
 			return err
+		}
+		if s.onResult != nil && len(cl.Planned) == 0 {
+			if err := s.onResult(result); err != nil {
+				return err
+			}
 		}
 		return a.emit(cl, s.op, params, result, s.cols)
 	}

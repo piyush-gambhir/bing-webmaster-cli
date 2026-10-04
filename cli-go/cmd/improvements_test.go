@@ -3,6 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -82,4 +84,22 @@ func toStrings(v any) []string {
 		out = append(out, i.(string))
 	}
 	return out
+}
+
+func TestFetchGetSaveWritesTheDocument(t *testing.T) {
+	isolate(t)
+	t.Setenv("BWT_API_KEY", "k")
+	t.Setenv("BWT_SITE", "https://www.example.com/")
+	f := &fake{handle: func(r *http.Request, body string) *http.Response {
+		return reply(200, `{"d":{"Url":"https://www.example.com/","Date":"/Date(1791105285941)/","Status":"Completed","Document":"HTTP/1.1 200 OK\r\n\r\n<html>big page</html>"}}`)
+	}}
+	out := filepath.Join(t.TempDir(), "fetched.txt")
+	res := run(t, f, "", "fetch", "get", "https://www.example.com/", "--save", out)
+	b, err := os.ReadFile(out)
+	if res.err != nil || err != nil || !strings.Contains(string(b), "<html>big page</html>") {
+		t.Fatalf("save: %v %v %q", res.err, err, b)
+	}
+	if strings.Contains(res.out, "big page") || !strings.Contains(res.out, "Completed") {
+		t.Fatalf("table must summarize, not dump the document: %q", res.out)
+	}
 }
