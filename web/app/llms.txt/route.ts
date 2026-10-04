@@ -6,10 +6,9 @@ import { getOtherSuiteProjects } from '@/lib/suite';
 
 export const revalidate = false;
 
-export function GET() {
-  const index = llms(source)
-    .index()
-    .replace(/\]\((\/[^)]+)\)/g, (_match, path: string) => `](${siteUrl}${path})`);
+export async function GET() {
+  // index() returns a Promise since fumadocs-core 16.15.17.
+  const index = (await llms(source).index()).replace(/\]\((\/[^)]+)\)/g, (_match, path: string) => `](${siteUrl}${path})`);
   const relatedSites = getOtherSuiteProjects(site.repo)
     .map(({ name, href }) => `- ${name}: ${href}`)
     .join('\n');
