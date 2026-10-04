@@ -17,8 +17,12 @@ Use `bwt --help` and `docs/commands.md` for current flags; `bwt/SKILL.md` has op
 - Credentials: secrets go to the OS keychain through `internal/secrets`; the plaintext file is only for
   explicit `--insecure-storage`. Never write secrets to the config file, stdout, logs, or errors. API keys
   travel in the URL, so keep using the client's redaction.
-- OAuth: `state` is mandatory, the callback port is bound before the browser opens, token requests use
-  `AuthStyleInParams` (exactly one request), and refresh runs under the per-profile lock.
+- Login is an API key: `bwt auth login` checks it with Bing before saving. There is no browser OAuth login,
+  because Bing's OAuth registration rejects loopback redirect URIs (verified 2026-10-04); do not add one back
+  without a public redirect design. `--access-token` / `BWT_ACCESS_TOKEN` stay for externally obtained tokens.
+- Bing quirks verified live: country codes (geo) and market codes (deep-link blocks) must be lowercase;
+  URL information methods returned UnknownError on a site without crawl data (cause undocumented, so never
+  report it as "not indexed"); GetSiteMoves returns 404.
 - Preserve stdout as command data and stderr as diagnostics. No automatic retries, no background calls.
 - Do not present performance rows as complete, submissions as indexed, or empty legacy results as healthy.
 - Tests use fake transports, temporary configs, and `keyring.MockInit()`; never the network or a real keychain.

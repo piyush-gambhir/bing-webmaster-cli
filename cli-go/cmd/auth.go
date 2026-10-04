@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"bufio"
-	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
+	"runtime"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,7 +19,10 @@ import (
 	"golang.org/x/term"
 )
 
-const revokeNote = "Bing has no token revocation endpoint. To revoke access, remove the app or regenerate the API key under Bing Webmaster Tools > Settings > API Access."
+// webmasterHome is where the API key lives: Settings > API Access > API Key.
+const webmasterHome = "https://www.bing.com/webmasters"
+
+const revokeNote = "Logging out removes the key from this machine only. To invalidate it, regenerate it in Bing Webmaster Tools > Settings > API Access."
 
 func (a *app) authCmd() *cobra.Command {
 	c := &cobra.Command{Use: "auth", Short: "Log in, inspect credentials, and manage profiles"}
@@ -52,15 +56,21 @@ func (a *app) profileName(cfg *config.Config) (string, error) {
 	return name, config.ValidName(name)
 }
 
+// terminal reports whether input is an interactive terminal.
+func (a *app) terminal() bool {
+	f, ok := a.in.(*os.File)
+	return ok && term.IsTerminal(int(f.Fd()))
+}
+
 // readSecret reads one secret from a hidden prompt, or from stdin when it is not a terminal.
 func (a *app) readSecret(prompt string) (string, error) {
-	f, isFile := a.in.(*os.File)
-	if isFile && term.IsTerminal(int(f.Fd())) {
+	if a.terminal() {
 		if a.noInput {
 			return "", fmt.Errorf("%s needs input; pipe it on stdin with --no-input", strings.ToLower(prompt))
 		}
+		fd := int(a.in.(*os.File).Fd())
 		fmt.Fprint(a.errOut, prompt+": ")
-		b, err := term.ReadPassword(int(f.Fd()))
+		b, err := term.ReadPassword(fd)
 		fmt.Fprintln(a.errOut)
 		if err != nil {
 			return "", err
@@ -77,26 +87,57 @@ func (a *app) readSecret(prompt string) (string, error) {
 	return strings.TrimSpace(string(b)), nil
 }
 
+// showAPIKeySteps tells an interactive user where the key is and opens Bing
+// Webmaster Tools; the URL is printed too in case no browser opens.
+func (a *app) showAPIKeySteps() {
+	fmt.Fprintf(a.errOut, "Log in with your Bing Webmaster Tools API key (one key covers all your sites):\n"+
+		"  1. Opening %s\n"+
+		"  2. Go to Settings (gear icon) > API Access > API Key, then Generate or copy your key.\n"+
+		"  3. Paste it below. Input is hidden.\n", webmasterHome)
+	open := a.openBrowser
+	if open == nil {
+		open = openURL
+	}
+	_ = open(webmasterHome)
+}
+
+// plural renders "1 site" or "3 sites".
+func plural(n int, noun string) string {
+	if n == 1 {
+		return "1 " + noun
+	}
+	return fmt.Sprintf("%d %ss", n, noun)
+}
+
+func openURL(u string) error {
+	switch runtime.GOOS {
+	case "darwin":
+		return exec.Command("open", u).Start()
+	case "windows":
+		return exec.Command("rundll32", "url.dll,FileProtocolHandler", u).Start()
+	default:
+		return exec.Command("xdg-open", u).Start()
+	}
+}
+
 func (a *app) loginCmd() *cobra.Command {
-	var withAPIKey, insecure, noVerify, secretStdin bool
-	var scope, clientID string
-	var port int
-	c := &cobra.Command{Use: "login", Short: "Log in with your browser (or an API key) and pick a default site", Args: cobra.NoArgs,
+	var withAPIKey, insecure, noVerify bool
+	c := &cobra.Command{Use: "login", Short: "Save your Bing Webmaster API key and pick a default site", Args: cobra.NoArgs,
 		Annotations: map[string]string{"writes-local": "true", "interactive": "true"},
-		Long: "Opens Bing's consent page in your browser using the built-in OAuth client, saves the login in the OS\n" +
-			"keychain, and sets a default site. --with-api-key saves an API key instead (Bing Webmaster Tools >\n" +
-			"Settings > API Access > API Key), read from a hidden prompt or from stdin when piped.\n" +
-			"Without an OS keychain, login stops unless you pass --insecure-storage (a 0600 plaintext file).",
-		Example: "  bwt auth login\n  bwt auth login --with-api-key\n  printf '%s' \"$KEY\" | bwt auth login --with-api-key --no-input --profile ci\n" +
-			"  bwt auth login --client-id ID --client-secret-stdin --redirect-port 8400 < secret.txt"}
-	c.Flags().BoolVar(&withAPIKey, "with-api-key", false, "Save an API key instead of using the browser")
-	c.Flags().BoolVar(&insecure, "insecure-storage", false, "Store secrets in a 0600 plaintext file instead of the OS keychain")
-	c.Flags().BoolVar(&noVerify, "no-verify", false, "Skip the GetUserSites check after saving")
-	c.Flags().StringVar(&scope, "scope", "manage", "OAuth scope: manage (read and write) or read")
-	c.Flags().StringVar(&clientID, "client-id", "", "Use your own OAuth client instead of the built-in one")
-	c.Flags().BoolVar(&secretStdin, "client-secret-stdin", false, "Read your OAuth client secret from stdin (with --client-id)")
-	c.Flags().IntVar(&port, "redirect-port", 0, "Loopback port registered with your own client (with --client-id)")
+		Long: "Logs in with your Bing Webmaster Tools API key, which covers every site in your account. In a terminal it\n" +
+			"opens Bing Webmaster Tools, shows where the key is (Settings > API Access > API Key), and reads it from a\n" +
+			"hidden prompt; piped input is read from stdin. The key is checked with one GetUserSites call before anything\n" +
+			"is saved, then stored in the OS keychain, and a default site is chosen. Without an OS keychain, login stops\n" +
+			"unless you pass --insecure-storage (a 0600 plaintext file). Bing's OAuth registration rejects loopback\n" +
+			"redirect URIs, so there is no browser OAuth login.",
+		Example: "  bwt auth login\n  bwt auth login --profile client-b\n  printf '%s' \"$KEY\" | bwt auth login --no-input --profile ci\n" +
+			"  BWT_API_KEY=... bwt sites list    # use a key without saving it"}
+	c.Flags().BoolVar(&withAPIKey, "with-api-key", false, "Accepted for compatibility; login always uses an API key")
+	_ = c.Flags().MarkHidden("with-api-key")
+	c.Flags().BoolVar(&insecure, "insecure-storage", false, "Store the key in a 0600 plaintext file instead of the OS keychain")
+	c.Flags().BoolVar(&noVerify, "no-verify", false, "Save without checking the key with Bing (for a key that is not active yet)")
 	c.RunE = func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
 		cfg, path, err := a.load()
 		if err != nil {
 			return err
@@ -109,238 +150,121 @@ func (a *app) loginCmd() *cobra.Command {
 		if err != nil {
 			return err
 		}
+		if a.terminal() && !a.noInput {
+			a.showAPIKeySteps()
+		}
+		key, err := a.readSecret("Bing Webmaster API key")
+		if err != nil {
+			return err
+		}
+		if key == "" || strings.ContainsAny(key, " \t\r\n") {
+			return fmt.Errorf("the API key must be nonempty and contain no whitespace")
+		}
+		// Check the key before saving anything, so a typo never lands in a profile.
+		var sites []string
+		if !noVerify {
+			data, err := a.clientFor(&creds{kind: "api_key", apiKey: key}).Call(ctx, "GetUserSites", map[string]any{})
+			if err != nil {
+				return fmt.Errorf("Bing did not accept this key, so nothing was saved: %w\n"+
+					"A newly generated key can take about 30 minutes to start working; try again later, or pass --no-verify to save it now", err)
+			}
+			for _, s := range asList(data) {
+				if u, ok := s["Url"].(string); ok {
+					sites = append(sites, u)
+				}
+			}
+			sort.Strings(sites)
+		}
+		// Choose a default site before taking the lock, since it may prompt.
+		chosen, picked := cfg.Profiles[name].Site, false
+		switch {
+		case noVerify, chosen != "" && slices.Contains(sites, chosen):
+		case len(sites) == 1:
+			chosen = sites[0]
+		case len(sites) > 1:
+			chosen = a.pick(sites)
+			picked = chosen != ""
+		default:
+			chosen = ""
+		}
 		prefer := secrets.Keychain
 		if insecure {
 			prefer = secrets.File
 		}
-		save := func(kind, value string) (secrets.Backend, error) {
-			saved, err := store.Save(cmd.Context(), auth.SecretKey(name, kind), value, prefer, false)
-			if err != nil {
-				return "", fmt.Errorf("%w\nNo OS keychain is available. Rerun with --insecure-storage to keep the secret in a 0600 file, or use BWT_API_KEY / BWT_ACCESS_TOKEN without saving", err)
-			}
-			return saved.Backend, nil
+		unlock, err := auth.LockProfile(ctx, path, name)
+		if err != nil {
+			return err
 		}
-		profile := cfg.Profiles[name]
-		previousStore := secrets.Backend(profile.TokenStore)
-		var backend secrets.Backend
-		// Persistence runs under the refresh lock (taken after any browser step,
-		// so a slow login never blocks other commands).
-		var unlock func()
-		lock := func() error {
-			var err error
-			if unlock, err = auth.LockProfile(cmd.Context(), path, name); err != nil {
-				return err
-			}
-			// Re-read under the lock: another process may have changed this profile
-			// (its storage backend, site, or IndexNow keys) while we waited.
-			fresh, err := config.Load(path)
-			if err != nil {
-				return err
-			}
-			profile = fresh.Profiles[name]
-			previousStore = secrets.Backend(profile.TokenStore)
-			return nil
+		defer unlock()
+		// Re-read under the lock: another process may have changed this profile
+		// (its storage backend, site, or IndexNow keys) meanwhile.
+		fresh, err := config.Load(path)
+		if err != nil {
+			return err
 		}
-		defer func() {
-			if unlock != nil {
-				unlock()
-			}
-		}()
-		if withAPIKey {
-			if clientID != "" || secretStdin || port != 0 {
-				return fmt.Errorf("--client-id, --client-secret-stdin, and --redirect-port apply to browser login, not --with-api-key")
-			}
-			key, err := a.readSecret("Bing Webmaster API key")
-			if err != nil {
-				return err
-			}
-			if key == "" || strings.ContainsAny(key, " \t\r\n") {
-				return fmt.Errorf("the API key must be nonempty and contain no whitespace")
-			}
-			if err := lock(); err != nil {
-				return err
-			}
-			if backend, err = save("api_key", key); err != nil {
-				return err
-			}
-			profile = config.Profile{Auth: config.AuthAPIKey, TokenStore: string(backend), Site: profile.Site, IndexNow: profile.IndexNow}
-		} else {
-			if a.noInput {
-				return fmt.Errorf("browser login needs interaction; use --with-api-key with the key on stdin, or set BWT_API_KEY")
-			}
-			oauthScope := auth.ScopeManage
-			switch scope {
-			case "manage":
-			case "read":
-				oauthScope = auth.ScopeRead
-			default:
-				return fmt.Errorf("--scope must be manage or read")
-			}
-			id, secret, client := "", "", config.ClientBuiltin
-			loginPort := auth.RedirectPort
-			if clientID != "" {
-				if !secretStdin {
-					return fmt.Errorf("--client-id needs --client-secret-stdin (the secret is never accepted as a flag)")
-				}
-				if port < 1 || port > 65535 {
-					return fmt.Errorf("--redirect-port is required with --client-id and must match the redirect URI you registered")
-				}
-				if secret, err = a.readSecret("OAuth client secret"); err != nil || secret == "" {
-					return fmt.Errorf("could not read the client secret from stdin")
-				}
-				id, client, loginPort = clientID, config.ClientCustom, port
-			} else {
-				if secretStdin || port != 0 {
-					return fmt.Errorf("--client-secret-stdin and --redirect-port apply only with --client-id")
-				}
-				var ok bool
-				if id, secret, ok = auth.Builtin(); !ok {
-					return fmt.Errorf("this build has no built-in OAuth client; use bwt auth login --with-api-key, set BWT_CLIENT_ID and BWT_CLIENT_SECRET, or pass --client-id")
-				}
-			}
-			tok, err := auth.Login(cmd.Context(), auth.LoginOptions{ClientID: id, ClientSecret: secret, Scope: oauthScope, Port: loginPort,
-				OpenBrowser: a.openBrowser, Log: a.errOut, HTTP: a.httpClient()})
-			if err != nil {
-				if strings.Contains(err.Error(), "cannot listen") {
-					return fmt.Errorf("%w\nThe registered callback port is busy. Close the other login, or use bwt auth login --with-api-key", err)
-				}
-				return err
-			}
-			if err := lock(); err != nil {
-				return err
-			}
-			stored := auth.Stored{RefreshToken: tok.RefreshToken}
-			if client == config.ClientCustom {
-				stored.ClientSecret = secret
-			}
-			payload, err := auth.Encode(stored)
-			if err != nil {
-				return err
-			}
-			// Clear any cached access token from a previous login before saving the
-			// new credential: if clearing fails nothing has changed, and a failed
-			// cache write below forces a refresh instead of reusing the old account.
-			for _, b := range []secrets.Backend{previousStore, prefer} {
-				if b != "" {
-					if err := store.Delete(cmd.Context(), b, auth.SecretKey(name, "access")); err != nil {
-						return fmt.Errorf("could not clear the previous cached access token: %w", err)
-					}
-				}
-			}
-			if backend, err = save("oauth", payload); err != nil {
-				return err
-			}
-			if access, err := auth.Encode(map[string]any{"access_token": tok.AccessToken, "expiry": tok.Expiry}); err == nil {
-				_, _ = store.Save(cmd.Context(), auth.SecretKey(name, "access"), access, backend, false)
-			}
-			profile = config.Profile{Auth: config.AuthOAuth, Client: client, ClientID: id, Scope: oauthScope, TokenStore: string(backend),
-				Site: profile.Site, IndexNow: profile.IndexNow}
-			if client == config.ClientCustom {
-				profile.RedirectPort = loginPort
-			}
+		previous := fresh.Profiles[name]
+		saved, err := store.Save(ctx, auth.SecretKey(name, "api_key"), key, prefer, false)
+		if err != nil {
+			return fmt.Errorf("%w\nNo OS keychain is available. Rerun with --insecure-storage to keep the key in a 0600 file, or set BWT_API_KEY without saving", err)
 		}
-		// Remove the other credential kind so a profile never mixes them.
-		stale := []string{"oauth", "access"}
-		if !withAPIKey {
-			stale = []string{"api_key"}
+		// Delete what the profile held before: v0.1.1 OAuth tokens, and the old key
+		// when the backend changed. The new key is saved, so a failure only warns.
+		backends := []secrets.Backend{saved.Backend}
+		if old := secrets.Backend(previous.TokenStore); old != "" && old != saved.Backend {
+			backends = append(backends, old)
 		}
-		for _, kind := range stale {
-			for _, b := range []secrets.Backend{previousStore, backend} {
-				if b != "" {
-					_ = store.Delete(cmd.Context(), b, auth.SecretKey(name, kind))
+		var leftovers []string
+		for _, b := range backends {
+			kinds := auth.LegacyKinds
+			if b != saved.Backend {
+				kinds = append([]string{"api_key"}, kinds...)
+			}
+			for _, kind := range kinds {
+				if err := store.Delete(ctx, b, auth.SecretKey(name, kind)); err != nil {
+					leftovers = append(leftovers, fmt.Sprintf("%s (%s): %v", auth.SecretKey(name, kind), b, err))
 				}
 			}
 		}
-		if previousStore != "" && previousStore != backend {
-			for _, kind := range []string{"oauth", "access", "api_key"} {
-				_ = store.Delete(cmd.Context(), previousStore, auth.SecretKey(name, kind))
-			}
+		if len(leftovers) > 0 {
+			fmt.Fprintf(a.errOut, "Could not delete old credentials, so remove them by hand: %s\n", strings.Join(leftovers, "; "))
 		}
-		if err := config.Update(cmd.Context(), path, func(c *config.Config) error {
+		switch {
+		case noVerify:
+			chosen = previous.Site // unchecked key: keep whatever site the profile has now
+		case !picked && previous.Site != "" && slices.Contains(sites, previous.Site):
+			chosen = previous.Site // another process may have run `bwt sites use` meanwhile
+		}
+		profile := config.Profile{Auth: config.AuthAPIKey, TokenStore: string(saved.Backend), Site: chosen, IndexNow: previous.IndexNow}
+		if err := config.Update(ctx, path, func(c *config.Config) error {
 			c.Profiles[name] = profile
 			c.CurrentProfile = name
 			return nil
 		}); err != nil {
 			return err
 		}
-		// Release before the first API call, which refreshes under the same lock.
-		unlock()
-		unlock = nil
-		result := map[string]any{"profile": name, "auth": profile.Auth, "token_store": profile.TokenStore, "saved": true}
-		if noVerify {
-			return a.print(result)
+		result := map[string]any{"profile": name, "auth": profile.Auth, "token_store": profile.TokenStore, "saved": true, "verified": !noVerify}
+		if !noVerify {
+			result["sites"] = len(sites)
 		}
-		site, count, err := a.pickDefaultSite(cmd.Context(), name, path)
-		if err != nil {
-			result["verified"] = false
-			_ = a.print(result)
-			if withAPIKey {
-				return fmt.Errorf("saved, but Bing rejected the key (a new key can take about 30 minutes to activate): %w", err)
-			}
-			return fmt.Errorf("saved, but the first call to Bing failed: %w", err)
+		if chosen != "" {
+			result["site"] = chosen
 		}
-		result["verified"], result["sites"] = true, count
-		if site != "" {
-			result["site"] = site
+		switch {
+		case noVerify:
+			a.info("Saved the key for profile %q without checking it.", name)
+		case chosen != "":
+			a.info("Logged in (profile %q). Found %s; default site is %s (change with: bwt sites use SITE).", name, plural(len(sites), "site"), chosen)
+		default:
+			a.info("Logged in (profile %q). Found %s; choose a default with: bwt sites use SITE", name, plural(len(sites), "site"))
 		}
 		return a.print(result)
 	}
 	return c
 }
 
-// pickDefaultSite lists the account's sites and sets the profile's default site
-// when it is unambiguous or the user picks one interactively.
-func (a *app) pickDefaultSite(ctx context.Context, name, path string) (string, int, error) {
-	cfg, err := config.Load(path)
-	if err != nil {
-		return "", 0, err
-	}
-	cr, err := a.profileCreds(cfg, path, name)
-	if err != nil {
-		return "", 0, err
-	}
-	data, err := a.clientFor(cr).Call(ctx, "GetUserSites", map[string]any{})
-	if err != nil {
-		return "", 0, err
-	}
-	var urls []string
-	for _, s := range asList(data) {
-		if u, ok := s["Url"].(string); ok {
-			urls = append(urls, u)
-		}
-	}
-	sort.Strings(urls)
-	current := cfg.Profiles[name].Site
-	chosen := ""
-	switch {
-	case current != "":
-		a.info("Found %d sites. Default site stays %s.", len(urls), current)
-		return current, len(urls), nil
-	case len(urls) == 1:
-		chosen = urls[0]
-	case len(urls) > 1:
-		chosen = a.pick(urls)
-	}
-	if chosen == "" {
-		a.info("Found %d sites. Choose a default with: bwt sites use SITE", len(urls))
-		return "", len(urls), nil
-	}
-	if err := config.Update(ctx, path, func(c *config.Config) error {
-		p := c.Profiles[name]
-		p.Site = chosen
-		c.Profiles[name] = p
-		return nil
-	}); err != nil {
-		return "", len(urls), err
-	}
-	a.info("Found %d sites. Default site set to %s (change with: bwt sites use SITE).", len(urls), chosen)
-	return chosen, len(urls), nil
-}
-
 // pick shows a numbered list on stderr; it returns "" without a terminal.
 func (a *app) pick(options []string) string {
-	f, ok := a.in.(*os.File)
-	if a.noInput || !ok || !term.IsTerminal(int(f.Fd())) {
+	if a.noInput || !a.terminal() {
 		return ""
 	}
 	for i, o := range options {
@@ -371,11 +295,7 @@ func (a *app) statusCmd() *cobra.Command {
 		}
 		result := map[string]any{"configured": true, "auth": cr.kind, "source": cr.source, "config_file": path}
 		if cr.profile != "" {
-			p := cfg.Profiles[cr.profile]
-			result["profile"], result["token_store"] = cr.profile, p.TokenStore
-			if p.Auth == config.AuthOAuth {
-				result["client"], result["scope"] = p.Client, p.Scope
-			}
+			result["profile"], result["token_store"] = cr.profile, cfg.Profiles[cr.profile].TokenStore
 		}
 		if site := a.defaultSiteValue(cfg); site != "" {
 			result["site"] = site
@@ -451,17 +371,16 @@ func (a *app) useProfileCmd() *cobra.Command {
 }
 
 func (a *app) logoutCmd() *cobra.Command {
-	return &cobra.Command{Use: "logout", Short: "Delete the profile's saved credentials (keeps its site and IndexNow keys)", Args: cobra.NoArgs,
+	return &cobra.Command{Use: "logout", Short: "Delete the profile's saved API key (keeps its site and IndexNow keys)", Args: cobra.NoArgs,
 		Annotations: map[string]string{"writes-local": "true"},
-		Long:        "Deletes the saved OAuth login or API key from the keychain or secrets file. " + revokeNote,
+		Long:        "Deletes the saved API key from the keychain or secrets file. " + revokeNote,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, path, err := a.load()
 			if err != nil {
 				return err
 			}
 			name := cfg.ProfileName(a.profile)
-			p, ok := cfg.Profiles[name]
-			if name == "" || !ok {
+			if _, ok := cfg.Profiles[name]; name == "" || !ok {
 				return fmt.Errorf("profile %q not found", name)
 			}
 			store, err := a.store()
@@ -473,28 +392,26 @@ func (a *app) logoutCmd() *cobra.Command {
 				return err
 			}
 			defer unlock()
-			// Re-read under the lock so we delete from the backend that holds the
-			// credentials now, not the one seen before waiting.
+			// Re-read under the lock so we delete from the backend that holds the key now.
 			if cfg, err = config.Load(path); err != nil {
 				return err
 			}
-			if p, ok = cfg.Profiles[name]; !ok {
+			p, ok := cfg.Profiles[name]
+			if !ok {
 				return fmt.Errorf("profile %q not found", name)
 			}
-			var failures []string
 			if p.TokenStore != "" {
-				for _, kind := range []string{"oauth", "access", "api_key"} {
+				// Also delete v0.1.1 OAuth tokens. Fail before forgetting the backend,
+				// or nothing would know where the leftovers live.
+				for _, kind := range append([]string{"api_key"}, auth.LegacyKinds...) {
 					if err := store.Delete(cmd.Context(), secrets.Backend(p.TokenStore), auth.SecretKey(name, kind)); err != nil {
-						failures = append(failures, err.Error())
+						return fmt.Errorf("could not delete the saved %s credential: %w", kind, err)
 					}
 				}
 			}
-			if len(failures) > 0 {
-				return errors.New("could not delete saved credentials: " + strings.Join(failures, "; "))
-			}
 			if err := config.Update(cmd.Context(), path, func(c *config.Config) error {
 				q := c.Profiles[name]
-				q.Auth, q.Client, q.ClientID, q.RedirectPort, q.Scope, q.TokenStore = "", "", "", 0, "", ""
+				q.Auth, q.TokenStore = "", ""
 				c.Profiles[name] = q
 				return nil
 			}); err != nil {

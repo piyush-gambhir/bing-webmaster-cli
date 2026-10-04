@@ -74,7 +74,7 @@ func (a *app) crawlIssuesCmd() *cobra.Command {
 			}
 			return err
 		}
-		rows := asList(client.ConvertDates(result))
+		rows := asList(client.Clean(result))
 		for _, r := range rows {
 			r["issue_labels"] = issueLabels(r["Issues"])
 		}

@@ -20,7 +20,7 @@ import (
 const keychainService = "bing-webmaster-cli"
 
 type creds struct {
-	kind    string // access_token, api_key, or oauth
+	kind    string // access_token or api_key
 	source  string
 	profile string
 	apiKey  string
@@ -110,23 +110,22 @@ func (a *app) profileCreds(cfg *config.Config, path, name string) (*creds, error
 	case config.AuthAPIKey:
 		key, err := store.Load(secrets.Backend(p.TokenStore), auth.SecretKey(name, "api_key"))
 		if errors.Is(err, secrets.ErrNotFound) {
-			return nil, fmt.Errorf("profile %q has no saved API key; run bwt auth login --with-api-key --profile %s", name, name)
+			return nil, fmt.Errorf("profile %q has no saved API key; run bwt auth login --profile %s", name, name)
 		}
 		if err != nil {
 			return nil, err
 		}
 		return &creds{kind: "api_key", source: "profile:" + name, profile: name, apiKey: key}, nil
-	case config.AuthOAuth:
-		s := &auth.Session{Profile: name, ConfigPath: path, Store: store, ReadOnly: a.readOnly, HTTP: a.httpClient()}
-		return &creds{kind: "oauth", source: "profile:" + name, profile: name, token: s.Token}, nil
+	case "oauth": // written by v0.1.1
+		return nil, fmt.Errorf("profile %q used browser login, which bwt no longer supports; run bwt auth login --profile %s with your API key", name, name)
 	default:
 		return nil, fmt.Errorf("profile %q has no Bing credentials; run bwt auth login --profile %s", name, name)
 	}
 }
 
+// bearerBase is the host for --access-token / BWT_ACCESS_TOKEN calls; Bing's
+// OAuth guide uses www.bing.com, and BWT_OAUTH_API_HOST=ssl.bing.com switches.
 func bearerBase() string {
-	// Bing's OAuth guide calls www.bing.com; this switch exists for the live check
-	// of whether ssl.bing.com also accepts bearer tokens.
 	if os.Getenv("BWT_OAUTH_API_HOST") == "ssl.bing.com" {
 		return client.KeyBase
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/output"
 	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/registry"
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,25 @@ func (a *app) apiCmd() *cobra.Command {
 			"--param values are sent as strings; use --data for typed JSON values (POST only).",
 		Example: "  bwt api GetUserSites\n  bwt api GetQueryStats --param siteUrl=https://example.com/\n" +
 			"  bwt api SubmitUrlBatch --data '{\"siteUrl\":\"https://example.com/\",\"urlList\":[\"https://example.com/a\"]}'"}
+	c.AddCommand(&cobra.Command{Use: "methods", Short: "List every Bing method: HTTP verb, read/write effect, status, and the command that calls it",
+		Args: cobra.NoArgs, Example: "  bwt api methods -o json",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cov := APICoverage(cmd.Root())
+			rows := make([]map[string]any, 0, len(registry.Ops))
+			for _, op := range registry.Ops {
+				names := make([]string, 0, len(op.Params))
+				for _, p := range op.Params {
+					names = append(names, p.Name)
+				}
+				commands := cov[op.Name]
+				if commands == nil {
+					commands = []string{}
+				}
+				rows = append(rows, map[string]any{"method": op.Name, "http": op.HTTP, "effect": string(op.Effect), "status": string(op.Status),
+					"group": op.Group, "params": names, "commands": commands, "note": op.Note})
+			}
+			return output.View(a.out, a.format, rows, rows, cols("method", "method", "http", "http", "effect", "effect", "status", "status", "commands", "commands")...)
+		}})
 	c.Flags().StringArrayVar(&params, "param", nil, "Parameter as name=value (repeatable)")
 	c.Flags().StringVar(&data, "data", "", "JSON object of parameters (POST)")
 	c.Flags().StringVar(&verb, "http", "", "HTTP method for methods not in the registry: GET or POST")
@@ -80,7 +100,7 @@ func (a *app) apiCmd() *cobra.Command {
 			return err
 		}
 		if len(cl.Planned) > 0 {
-			return a.print(map[string]any{"dry_run": true, "requests": cl.Planned})
+			return a.printPlanned(cl.Planned)
 		}
 		return a.print(a.convert(result))
 	}

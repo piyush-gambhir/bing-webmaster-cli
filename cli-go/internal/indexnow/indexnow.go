@@ -46,6 +46,38 @@ func ValidKey(k string) bool { return keyPattern.MatchString(k) }
 
 func DefaultKeyLocation(host, key string) string { return "https://" + host + "/" + key + ".txt" }
 
+// CanonicalHost requests https://host/ and returns the host the site finally
+// serves pages from, so a site registered as example.com but served from
+// www.example.com gets its key on the host that appears in submitted URLs. Only
+// a www. variant of the same host is accepted; other redirects are ignored.
+func CanonicalHost(ctx context.Context, h *http.Client, host string) (string, error) {
+	c := *h
+	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		if len(via) >= 5 {
+			return errors.New("too many redirects")
+		}
+		return nil
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://"+host+"/", nil)
+	if err != nil {
+		return host, err
+	}
+	res, err := c.Do(req)
+	if err != nil {
+		return host, err
+	}
+	defer res.Body.Close()
+	_, _ = io.Copy(io.Discard, io.LimitReader(res.Body, 1<<16))
+	final := strings.ToLower(res.Request.URL.Hostname())
+	if final == "" || final == host {
+		return host, nil
+	}
+	if final == "www."+host || host == "www."+final {
+		return final, nil
+	}
+	return host, nil
+}
+
 // HostOf returns the lowercased host of an absolute http(s) URL.
 func HostOf(raw string) (string, error) {
 	u, err := url.Parse(raw)
@@ -71,7 +103,12 @@ func CheckKey(ctx context.Context, h *http.Client, keyLocation, key string) erro
 	}
 	defer res.Body.Close()
 	if res.StatusCode >= 300 && res.StatusCode < 400 {
-		return fmt.Errorf("%s redirects to %s (HTTP %d); host the key file at the exact location", keyLocation, res.Header.Get("Location"), res.StatusCode)
+		loc := res.Header.Get("Location")
+		msg := fmt.Sprintf("%s redirects to %s (HTTP %d); host the key file at the exact location", keyLocation, loc, res.StatusCode)
+		if u, err := url.Parse(loc); err == nil && u.Host != "" {
+			msg += fmt.Sprintf(". If your pages are served from %s, use --host %s so the key and the submitted URLs share a host", u.Host, u.Host)
+		}
+		return errors.New(msg)
 	}
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("%s returned HTTP %d; upload a text file containing only the key", keyLocation, res.StatusCode)

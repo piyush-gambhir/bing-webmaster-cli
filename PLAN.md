@@ -5,9 +5,42 @@ submission, IndexNow, keyword research, and site settings. Built for people and 
 sibling CLIs in this folder and sharing conventions with [gsc-cli](../gsc-cli/PLAN.md). Facts, limits,
 and sources are in [RESEARCH.md](RESEARCH.md); this file is the design.
 
-Status: **built** (2026-10-03). Phases P0 to P5 are implemented in `cli-go/`; the owner tasks and live checks
-listed under [Build status](#build-status) remain. Decisions are recorded in [Decisions](#decisions).
-The code passed three independent review rounds (gpt-6.1-sol); every confirmed finding was fixed with tests.
+Status: **released and verified live** (2026-10-04). Phases P0 to P5 are implemented in `cli-go/` and every
+command was exercised against a real account. The 2026-10-04 revision below supersedes the OAuth parts of
+this plan: login is an API key, because Bing rejects the loopback redirect a CLI needs. Decisions are recorded
+in [Decisions](#decisions).
+
+## Revision 2026-10-04: API-key login and live verification
+
+**Why the login changed.** Registering the built-in OAuth client failed: Bing Webmaster Tools rejects
+`http://127.0.0.1:47619/callback` and `http://localhost:47619/callback` as "not a valid http or https url".
+Browser OAuth would need a hosted relay page, so the OAuth code was removed and `bwt auth login` takes the API
+key instead: it opens Bing Webmaster Tools, reads the key at a hidden prompt, checks it before saving, stores
+it in the keychain, and picks a default site. Bearer tokens obtained elsewhere still work through
+`BWT_ACCESS_TOKEN`.
+
+**Live results.** See [docs/compatibility.md](docs/compatibility.md#live-checks-2026-10-04). Two request bugs
+were found and fixed (lowercase country and market codes). Geo-targeting, deep-link blocks, and content
+submission (which works with an API key) left `experimental`; site moves stayed (HTTP 404).
+
+**Improvement plan.** Agents are the main users, so output and errors favor predictable machine use while
+tables stay readable for people.
+
+| Area | Improvement | Status |
+| --- | --- | --- |
+| Login | API key flow with steps, browser hand-off, verify-before-save, default site, singular/plural wording | Done |
+| Agent output | JSON without Bing's `__type` metadata; RFC 3339 dates; `--raw` for the wire format | Done |
+| Agent discovery | `bwt api methods -o json`: every method with effect, status, and command | Done |
+| Agent guidance | `bwt/SKILL.md` rewritten agent-first: discovery, credentials, error names, safety, verified behavior, recipes | Done |
+| Tables | One-row tables for single objects (`fetch get` no longer dumps the document); named columns for preview and deep-link blocks; dry runs as one row per request; empty paged results print `No results.` | Done |
+| Messages | Hints for `UnknownError` (no reason given; seen on sites without crawl data) and for empty stats on new sites | Done |
+| IndexNow | Key commands follow the site's www redirect so keys land on the serving host; key-check errors name the right `--host` | Done |
+| URL methods | Accept Bing's documented `domain:example.com` form | Done |
+| Fetch | `fetch get --save FILE` writes the fetched document | Done |
+| Bing quirks | Lowercase country and market codes sent automatically | Done |
+| Data semantics | Position scale and weekly-or-daily date buckets need a site with traffic to confirm | Open: needs data, not code |
+| Experimental | `site-move` returns 404; recheck when Bing changes it | Open: upstream |
+
 
 ## Goals
 

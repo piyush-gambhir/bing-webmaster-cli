@@ -275,7 +275,8 @@ func (a *app) previewBlocksCmd() *cobra.Command {
 	var reason string
 	c := &cobra.Command{Use: "preview-blocks", Short: "Block or allow page previews (snippets) in Bing results"}
 	c.AddCommand(
-		a.opCmd(opSpec{use: "list", short: "List active page preview blocks", op: "GetActivePagePreviewBlocks"}),
+		a.opCmd(opSpec{use: "list", short: "List active page preview blocks", op: "GetActivePagePreviewBlocks",
+			cols: cols("url", "Url", "reason", "Reason", "submitted", "SubmitDate")}),
 		a.opCmd(opSpec{use: "add URL", short: "Block the preview for a URL", op: "AddPagePreviewBlock", args: []string{"url"},
 			long: "--reason is Bing's BlockReason number. Microsoft does not publish the enum values; existing blocks in\npreview-blocks list show the values in use.",
 			setup: func(c *cobra.Command) func() (map[string]any, error) {

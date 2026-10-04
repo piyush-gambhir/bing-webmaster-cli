@@ -66,3 +66,28 @@ func ConvertDates(v any) any {
 		return v
 	}
 }
+
+// Clean prepares Bing data for output: Microsoft JSON dates become RFC 3339 and
+// the WCF "__type" metadata Bing adds to objects is dropped. --raw skips it.
+func Clean(v any) any { return stripType(ConvertDates(v)) }
+
+func stripType(v any) any {
+	switch x := v.(type) {
+	case map[string]any:
+		out := make(map[string]any, len(x))
+		for k, val := range x {
+			if k != "__type" {
+				out[k] = stripType(val)
+			}
+		}
+		return out
+	case []any:
+		out := make([]any, len(x))
+		for i, val := range x {
+			out[i] = stripType(val)
+		}
+		return out
+	default:
+		return v
+	}
+}

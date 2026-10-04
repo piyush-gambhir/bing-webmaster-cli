@@ -133,7 +133,7 @@ func (a *app) submitCmd() *cobra.Command {
 			batches = append(batches, entry)
 		}
 		if len(cl.Planned) > 0 {
-			return a.print(map[string]any{"dry_run": true, "requests": cl.Planned})
+			return a.printPlanned(cl.Planned)
 		}
 		report["accepted"] = accepted
 		report["batches"] = batches
@@ -146,7 +146,7 @@ func (a *app) submitCmd() *cobra.Command {
 		}
 		return output.View(a.out, a.format, report, batches, cols("batch", "batch", "count", "count", "status", "status")...)
 	}
-	c.AddCommand(urls)
+	c.AddCommand(urls, a.submitContentCmd())
 	return c
 }
 
@@ -188,9 +188,27 @@ func quotaRow(kind string, v any) map[string]any {
 
 func (a *app) fetchCmd() *cobra.Command {
 	c := &cobra.Command{Use: "fetch", Short: "Fetch as Bingbot: request a fetch and read the results"}
+	var save string
 	get := a.opCmd(opSpec{use: "get URL", short: "Show a fetched URL's status, headers, and document", op: "GetFetchedUrlDetails", args: []string{"url"},
-		cols: cols("url", "Url", "date", "Date", "status", "Status"),
-		long: "The table shows the status; use -o json for the response headers and document."})
+		cols:    cols("url", "Url", "date", "Date", "status", "Status"),
+		long:    "The table shows the status. --save writes what Bingbot fetched (its crawl record and the response) to a\nfile; -o json includes it too.",
+		example: "  bwt fetch get https://www.example.com/ --save fetched.txt",
+		setup: func(c *cobra.Command) func() (map[string]any, error) {
+			c.Flags().StringVar(&save, "save", "", "Write the fetched document to this file")
+			return nil
+		},
+		onResult: func(result any) error {
+			if save == "" {
+				return nil
+			}
+			m, _ := result.(map[string]any)
+			doc, _ := m["Document"].(string)
+			if err := os.WriteFile(save, []byte(doc), 0o600); err != nil {
+				return fmt.Errorf("--save: %w", err)
+			}
+			a.info("Saved the fetched document (%d bytes) to %s.", len(doc), save)
+			return nil
+		}})
 	c.AddCommand(
 		a.opCmd(opSpec{use: "request URL", short: "Ask Bingbot to fetch a URL", op: "FetchUrl", args: []string{"url"},
 			long: "Schedules a Bingbot fetch. Check the result later with bwt fetch list and bwt fetch get."}),
@@ -206,5 +224,5 @@ func (a *app) convert(v any) any {
 	if a.raw {
 		return v
 	}
-	return client.ConvertDates(v)
+	return client.Clean(v)
 }

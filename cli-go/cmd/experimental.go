@@ -20,10 +20,10 @@ var (
 )
 
 func (a *app) experimentalCmd() *cobra.Command {
-	c := &cobra.Command{Use: "experimental", Short: "Documented Bing methods whose current behavior is unverified",
-		Long: "These methods are still in Bing's documentation, but there is no current evidence that they work.\n" +
-			"Each run prints a notice. Confirm results in the Bing Webmaster Tools dashboard."}
-	c.AddCommand(a.geoCmd(), a.siteMoveCmd(), a.deepLinkBlocksCmd(), a.submitContentCmd())
+	c := &cobra.Command{Use: "experimental", Short: "Documented Bing methods that did not work in live checks",
+		Long: "These methods are still in Bing's documentation, but a live check on 2026-10-04 failed (GetSiteMoves\n" +
+			"returned HTTP 404). Each run prints a notice. Confirm results in the Bing Webmaster Tools dashboard."}
+	c.AddCommand(a.siteMoveCmd())
 	return c
 }
 
@@ -41,7 +41,8 @@ func (a *app) geoCmd() *cobra.Command {
 		if err != nil {
 			return nil, err
 		}
-		return map[string]any{"settings": map[string]any{"Url": url, "TwoLetterIsoCountryCode": strings.ToUpper(country), "Type": t}}, nil
+		// Bing accepts lowercase country codes only (us); US is rejected as InvalidParameter.
+		return map[string]any{"settings": map[string]any{"Url": url, "TwoLetterIsoCountryCode": strings.ToLower(country), "Type": t}}, nil
 	}
 	flags := func(c *cobra.Command) func() (map[string]any, error) {
 		c.Flags().StringVar(&url, "url", "", "Page, directory, or host URL (required)")
@@ -110,12 +111,14 @@ func (a *app) deepLinkBlocksCmd() *cobra.Command {
 			if err := requireURL("--deep-link-url", deepLinkURL); err != nil {
 				return nil, err
 			}
-			return map[string]any{"market": market, "searchUrl": searchURL, "deepLinkUrl": deepLinkURL}, nil
+			// Bing accepts lowercase market codes only (en-us); en-US is rejected as InvalidParameter.
+			return map[string]any{"market": strings.ToLower(market), "searchUrl": searchURL, "deepLinkUrl": deepLinkURL}, nil
 		}
 	}
 	c := &cobra.Command{Use: "deeplink-blocks", Short: "Block deep links (sitelinks) shown under a result"}
 	c.AddCommand(
-		a.opCmd(opSpec{use: "list", short: "List deep-link blocks", op: "GetDeepLinkBlocks"}),
+		a.opCmd(opSpec{use: "list", short: "List deep-link blocks", op: "GetDeepLinkBlocks",
+			cols: cols("deep_link", "DeepLinkUrl", "search_url", "SearchUrl", "market", "Market", "submitted", "SubmitDate", "expires", "ExpiryDate")}),
 		a.opCmd(opSpec{use: "add", short: "Block a deep link", op: "AddDeepLinkBlock", setup: flags}),
 		a.opCmd(opSpec{use: "remove", short: "Remove a deep-link block", op: "RemoveDeepLinkBlock", setup: flags}),
 	)
@@ -126,11 +129,12 @@ const maxContent = 10 << 20
 
 func (a *app) submitContentCmd() *cobra.Command {
 	var file, structured, serving string
-	return a.opCmd(opSpec{use: "submit-content URL", short: "Push a page's full HTTP response to Bing (content submission)", op: "SubmitContent",
+	return a.opCmd(opSpec{use: "content URL", short: "Push a page's full HTTP response to Bing (content submission)", op: "SubmitContent",
 		args: []string{"url"},
 		long: "Sends a complete HTTP response (status line, headers, blank line, body) for URL, base64-encoded, up to 10 MB.\n" +
-			"Bing's docs conflict on whether this needs OAuth, and submitted content may be indexed even if robots.txt\n" +
-			"disallows it (NOINDEX is honored).",
+			"Works with an API key. Submitted content may be indexed even if robots.txt disallows it (NOINDEX is\n" +
+			"honored). Capture a response with: curl -s --http1.1 -i https://example.com/page -o page.http",
+		example: "  curl -s --http1.1 -i https://www.example.com/ -o home.http\n  bwt submit content https://www.example.com/ --file home.http",
 		confirm: "Bing may index the submitted content for %s even if robots.txt disallows it",
 		setup: func(c *cobra.Command) func() (map[string]any, error) {
 			c.Flags().StringVar(&file, "file", "", "File with the full HTTP response (required)")

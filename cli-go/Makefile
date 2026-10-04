@@ -4,13 +4,7 @@ VERSION ?= dev
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 DATE ?= $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 
-# The built-in OAuth client comes from the environment or an untracked .env.local;
-# it is never committed. Builds without it still support API-key login.
--include .env.local
-export BWT_OAUTH_CLIENT_ID BWT_OAUTH_CLIENT_SECRET
-
-LDFLAGS := -s -w -X $(MODULE)/internal/build.Version=$(VERSION) -X $(MODULE)/internal/build.Commit=$(COMMIT) -X $(MODULE)/internal/build.Date=$(DATE) \
-	-X $(MODULE)/internal/auth.ClientID=$(BWT_OAUTH_CLIENT_ID) -X $(MODULE)/internal/auth.ClientSecret=$(BWT_OAUTH_CLIENT_SECRET)
+LDFLAGS := -s -w -X $(MODULE)/internal/build.Version=$(VERSION) -X $(MODULE)/internal/build.Commit=$(COMMIT) -X $(MODULE)/internal/build.Date=$(DATE)
 INSTALL_DIR ?= $(shell go env GOPATH)/bin
 
 .PHONY: build install test vet fmt tidy docs
