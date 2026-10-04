@@ -441,12 +441,6 @@ func TestRecordKeepsHistory(t *testing.T) {
 	if got := ReadCache(dir); got.LatestVersion != "0.1.5" || got.Error != "" || !got.NotifiedAt.Equal(now) || c.LatestVersion != "0.1.5" {
 		t.Fatalf("cache %+v", got)
 	}
-	if err := ClearCache(dir); err != nil || ReadCache(dir) != (Cache{}) {
-		t.Fatalf("clear %v", err)
-	}
-	if err := ClearCache(dir); err != nil {
-		t.Fatal(err)
-	}
 	os.WriteFile(filepath.Join(dir, CacheFile), []byte(`{"latest_version":"../../x"}`), 0600)
 	if ReadCache(dir) != (Cache{}) {
 		t.Fatal("accepted an invalid cached version")

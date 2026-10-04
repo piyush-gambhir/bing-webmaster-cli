@@ -1283,8 +1283,10 @@ installing but allows --check.
 
 Update notice: in an interactive terminal, bwt checks the github.com releases page (not the GitHub API,
 so its rate limit never applies) for a new release at most once a day and, after a command's output,
-prints a notice on stderr. It never checks when stderr is not a terminal, when CI is set, with --quiet,
-or when BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).
+prints a notice on stderr. The command that runs the day's check waits up to 1 second after its output
+for the answer; other commands never wait. bwt update and update --check store their result in the same
+cache. It never checks when stderr is not a terminal, when CI is set, with --quiet, or when
+BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).
 
 ```text
 bwt update [flags]

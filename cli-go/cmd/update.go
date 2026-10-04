@@ -30,8 +30,10 @@ func (a *app) updateCmd() *cobra.Command {
 			"installing but allows --check.\n\n" +
 			"Update notice: in an interactive terminal, bwt checks the github.com releases page (not the GitHub API,\n" +
 			"so its rate limit never applies) for a new release at most once a day and, after a command's output,\n" +
-			"prints a notice on stderr. It never checks when stderr is not a terminal, when CI is set, with --quiet,\n" +
-			"or when BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).",
+			"prints a notice on stderr. The command that runs the day's check waits up to 1 second after its output\n" +
+			"for the answer; other commands never wait. bwt update and update --check store their result in the same\n" +
+			"cache. It never checks when stderr is not a terminal, when CI is set, with --quiet, or when\n" +
+			"BWT_NO_UPDATE_NOTIFIER or NO_UPDATE_NOTIFIER is set (to anything).",
 		Example: "  bwt update --check\n  bwt update\n  bwt update --yes --no-input",
 		Args:    cobra.NoArgs, Annotations: map[string]string{"self-update": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -97,9 +99,6 @@ func (a *app) updateCmd() *cobra.Command {
 			}
 			if err := update.Replace(exe, bin, goos); err != nil {
 				return err
-			}
-			if dirErr == nil {
-				_ = update.ClearCache(dir)
 			}
 			result["updated"] = true
 			return a.updateResult(result, fmt.Sprintf("Updated bwt %s -> %s\nRelease notes: %s", from, to, r.URL))

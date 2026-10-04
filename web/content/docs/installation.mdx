@@ -79,7 +79,9 @@ Update with: bwt update
 Release notes: https://github.com/piyush-gambhir/bing-webmaster-cli/releases/tag/v0.1.4
 ```
 
-The check never delays a command and never runs (no network, no output) when:
+Only the one command a day that runs the check waits for its answer, at most 1 second after its output;
+every other command uses the cached answer and never waits. `bwt update` and `bwt update --check` store
+what they find in the same cache. The check never runs (no network, no output) when:
 
 - stderr is not a terminal (pipes, scripts, coding agents),
 - `CI` is set,
