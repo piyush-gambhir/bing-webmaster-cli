@@ -27,7 +27,7 @@ SHA-256 checksums. Prebuilt macOS, Linux, and Windows binaries are on the
 [releases page](https://github.com/piyush-gambhir/bing-webmaster-cli/releases). Another tool, Bitcoin Wallet
 Tracker, also installs a `bwt` binary; the installer and `bwt doctor` warn when one shadows the other.
 
-From source (Go 1.26+, toolchain 1.27.1):
+From source (Go 1.27+, toolchain 1.27.2):
 
 ```bash
 git clone https://github.com/piyush-gambhir/bing-webmaster-cli.git
