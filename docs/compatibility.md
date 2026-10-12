@@ -89,9 +89,9 @@ methods on a site Bing has crawled. `BlockReason` values beyond 1 (`ContentNeeds
 
 | Component | Version |
 | --- | --- |
-| Go | 1.26 minimum, toolchain 1.27.1 |
+| Go | 1.27 minimum, toolchain 1.27.2 |
 | `github.com/spf13/cobra` | 1.10.2 |
 | `github.com/zalando/go-keyring` | 0.2.8 |
 | `github.com/gofrs/flock` / `github.com/google/renameio/v2` | 0.13.1 / 2.0.2 |
 | `go.yaml.in/yaml/v3` | 3.0.5 |
-| `golang.org/x/sys` / `golang.org/x/term` | 0.48.0 / 0.46.0 |
+| `golang.org/x/sys` / `golang.org/x/term` | 0.49.0 / 0.47.0 |
