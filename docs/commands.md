@@ -199,6 +199,26 @@ changes Bing state (blocked by --read-only); Bing methods: GetBlockedUrls, Remov
 bwt block remove URL
 ```
 
+## bwt commands
+
+Offline command discovery for agents
+
+```text
+bwt commands
+```
+
+## bwt commands resolve
+
+Show the command, effect and flags that arguments would run, without running them
+
+```text
+bwt commands resolve -- <arguments>
+```
+
+```bash
+  bwt commands resolve -- sites list
+```
+
 ## bwt completion
 
 Generate shell completion script

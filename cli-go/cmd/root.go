@@ -59,6 +59,13 @@ func newRoot(a *app) *cobra.Command {
 			"Data goes to stdout and diagnostics to stderr. --read-only blocks every state change.",
 		SilenceUsage: true, SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Safety settings from the environment are sticky: an explicit false flag cannot undo them.
+			if envBool("BWT_READ_ONLY") {
+				a.readOnly = true
+			}
+			if envBool("BWT_NO_INPUT") {
+				a.noInput = true
+			}
 			if !output.Valid(a.format) {
 				return fmt.Errorf("unsupported output %q; use table, json, yaml, or csv", a.format)
 			}
@@ -100,7 +107,7 @@ func newRoot(a *app) *cobra.Command {
 	root.AddCommand(a.authCmd(), a.configCmd(), a.sitesCmd(), a.statsCmd(), a.crawlCmd(), a.urlCmd(),
 		a.linksCmd(), a.connectedPagesCmd(), a.sitemapsCmd(), a.submitCmd(), a.quotaCmd(), a.indexnowCmd(),
 		a.keywordsCmd(), a.fetchCmd(), a.usersCmd(), a.paramsCmd(), a.blockCmd(), a.previewBlocksCmd(),
-		a.geoCmd(), a.deepLinkBlocksCmd(), a.experimentalCmd(), a.apiCmd(), a.doctorCmd(), a.updateCmd())
+		a.geoCmd(), a.deepLinkBlocksCmd(), a.experimentalCmd(), a.apiCmd(), a.doctorCmd(), a.updateCmd(), a.commandsCmd())
 	login := a.loginCmd()
 	login.Short = "Alias for auth login"
 	root.AddCommand(login)
