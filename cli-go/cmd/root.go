@@ -107,7 +107,7 @@ func newRoot(a *app) *cobra.Command {
 	root.AddCommand(a.authCmd(), a.configCmd(), a.sitesCmd(), a.statsCmd(), a.crawlCmd(), a.urlCmd(),
 		a.linksCmd(), a.connectedPagesCmd(), a.sitemapsCmd(), a.submitCmd(), a.quotaCmd(), a.indexnowCmd(),
 		a.keywordsCmd(), a.fetchCmd(), a.usersCmd(), a.paramsCmd(), a.blockCmd(), a.previewBlocksCmd(),
-		a.geoCmd(), a.deepLinkBlocksCmd(), a.experimentalCmd(), a.apiCmd(), a.doctorCmd(), a.updateCmd())
+		a.geoCmd(), a.deepLinkBlocksCmd(), a.experimentalCmd(), a.apiCmd(), a.doctorCmd(), a.updateCmd(), a.commandsCmd())
 	login := a.loginCmd()
 	login.Short = "Alias for auth login"
 	root.AddCommand(login)
