@@ -89,7 +89,7 @@ methods on a site Bing has crawled. `BlockReason` values beyond 1 (`ContentNeeds
 
 | Component | Version |
 | --- | --- |
-| Go | 1.27 minimum, toolchain 1.27.2 |
+| Go | 1.27 minimum, toolchain 1.27.3 |
 | `github.com/spf13/cobra` | 1.10.2 |
 | `github.com/zalando/go-keyring` | 0.2.8 |
 | `github.com/gofrs/flock` / `github.com/google/renameio/v2` | 0.13.1 / 2.0.2 |
