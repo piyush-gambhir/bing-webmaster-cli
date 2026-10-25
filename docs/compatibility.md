@@ -4,6 +4,10 @@
 protocol. This page records the exact documentation snapshot that the operation registry and its tests
 were built against, so upstream changes can be detected and reviewed instead of discovered in production.
 
+## Node docs verification
+
+Verified 2026-10-26 with Node.js 26.12.1 and pnpm 12.15.0: reference-page synchronization, TypeScript 7 checks, the static Cloudflare build, and installation search pass. The Worker package passes a deployment dry run; the Go CLI runtime is unchanged.
+
 ## Pinned snapshot
 
 Captured **2026-10-03**.
