@@ -5,19 +5,19 @@ Generated from the command tree. Run `make docs` to refresh.
 Global flags apply to every command.
 
 ```text
-      --access-token string   Bearer token override (prefer BWT_ACCESS_TOKEN)
-      --api-key string        API key override (prefer BWT_API_KEY or auth login)
-      --dry-run               For writes: print the requests and send nothing
-      --no-input              Never prompt or open a browser
-  -o, --output string         Output format: table, json, yaml, csv (default "table")
-      --profile string        Named profile (or BWT_PROFILE)
-  -q, --quiet                 Suppress informational stderr output
-      --raw                   Print Bing's wire JSON without date conversion
-      --read-only             Block remote writes, local credential changes, and self-update
-  -s, --site string           Site URL exactly as in sites list, or a bare host (or BWT_SITE)
-      --timeout duration      HTTP request timeout (default 30s)
-  -v, --verbose               Log method, redacted URL, and status to stderr
-  -y, --yes                   Confirm destructive commands and updates without a prompt
+      --access-token string      Bearer token override (prefer BWT_ACCESS_TOKEN)
+      --api-key string           API key override (prefer BWT_API_KEY or auth login)
+      --dry-run[=true|false]     For writes: print the requests and send nothing
+      --no-input[=true|false]    Never prompt or open a browser
+  -o, --output string            Output format: table, json, yaml, csv (default "table")
+      --profile string           Named profile (or BWT_PROFILE)
+  -q, --quiet[=true|false]       Suppress informational stderr output
+      --raw[=true|false]         Print Bing's wire JSON without date conversion
+      --read-only[=true|false]   Block remote writes, local credential changes, and self-update
+  -s, --site string              Site URL exactly as in sites list, or a bare host (or BWT_SITE)
+      --timeout duration         HTTP request timeout (default 30s)
+  -v, --verbose[=true|false]     Log method, redacted URL, and status to stderr
+  -y, --yes[=true|false]         Confirm destructive commands and updates without a prompt
 ```
 
 ## bwt
@@ -111,8 +111,8 @@ bwt auth login [flags]
 ```
 
 ```text
-      --insecure-storage   Store the key in a 0600 plaintext file instead of the OS keychain
-      --no-verify          Save without checking the key with Bing (for a key that is not active yet)
+      --insecure-storage[=true|false]   Store the key in a 0600 plaintext file instead of the OS keychain
+      --no-verify[=true|false]          Save without checking the key with Bing (for a key that is not active yet)
 ```
 
 ## bwt auth logout
@@ -138,7 +138,7 @@ bwt auth status [flags]
 ```
 
 ```text
-      --verify   Check access with one GetUserSites call
+      --verify[=true|false]   Check access with one GetUserSites call
 ```
 
 ## bwt auth use
@@ -254,7 +254,7 @@ bwt config show [flags]
 ```
 
 ```text
-      --verify   Check access with one GetUserSites call
+      --verify[=true|false]   Check access with one GetUserSites call
 ```
 
 ## bwt config use-profile
@@ -424,7 +424,7 @@ bwt doctor [flags]
 ```
 
 ```text
-      --verify   Also check access with one GetUserSites call
+      --verify[=true|false]   Also check access with one GetUserSites call
 ```
 
 ## bwt experimental
@@ -623,8 +623,8 @@ bwt indexnow key generate [flags]
 ```
 
 ```text
-      --host string   Host the key is for (default: the selected site's host)
-      --no-save       Print the key without saving it
+      --host string            Host the key is for (default: the selected site's host)
+      --no-save[=true|false]   Print the key without saving it
 ```
 
 ## bwt indexnow submit
@@ -738,9 +738,9 @@ bwt links counts [flags]
 ```
 
 ```text
-      --all             Fetch pages until the end (bounded by --max-pages)
-      --max-pages int   Upper bound on pages fetched with --all (default 100)
-      --page int        Page to fetch, starting at 0
+      --all[=true|false]   Fetch pages until the end (bounded by --max-pages)
+      --max-pages int      Upper bound on pages fetched with --all (default 100)
+      --page int           Page to fetch, starting at 0
 ```
 
 ## bwt links list
@@ -756,9 +756,9 @@ bwt links list URL [flags]
 ```
 
 ```text
-      --all             Fetch pages until the end (bounded by --max-pages)
-      --max-pages int   Upper bound on pages fetched with --all (default 100)
-      --page int        Page to fetch, starting at 0
+      --all[=true|false]   Fetch pages until the end (bounded by --max-pages)
+      --max-pages int      Upper bound on pages fetched with --all (default 100)
+      --page int           Page to fetch, starting at 0
 ```
 
 ## bwt login
@@ -786,8 +786,8 @@ bwt login [flags]
 ```
 
 ```text
-      --insecure-storage   Store the key in a 0600 plaintext file instead of the OS keychain
-      --no-verify          Save without checking the key with Bing (for a key that is not active yet)
+      --insecure-storage[=true|false]   Store the key in a 0600 plaintext file instead of the OS keychain
+      --no-verify[=true|false]          Save without checking the key with Bing (for a key that is not active yet)
 ```
 
 ## bwt params
@@ -1051,11 +1051,11 @@ bwt stats detail QUERY URL [flags]
 ```
 
 ```text
-      --asc            Sort ascending
-      --limit int      Keep at most N rows after sorting (local)
-      --since string   Keep rows on or after this day (YYYY-MM-DD, local filter)
-      --sort string    Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
-      --until string   Keep rows on or before this day (YYYY-MM-DD, local filter)
+      --asc[=true|false]   Sort ascending
+      --limit int          Keep at most N rows after sorting (local)
+      --since string       Keep rows on or after this day (YYYY-MM-DD, local filter)
+      --sort string        Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
+      --until string       Keep rows on or before this day (YYYY-MM-DD, local filter)
 ```
 
 ## bwt stats page-queries
@@ -1074,11 +1074,11 @@ bwt stats page-queries URL [flags]
 ```
 
 ```text
-      --asc            Sort ascending
-      --limit int      Keep at most N rows after sorting (local)
-      --since string   Keep rows on or after this day (YYYY-MM-DD, local filter)
-      --sort string    Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
-      --until string   Keep rows on or before this day (YYYY-MM-DD, local filter)
+      --asc[=true|false]   Sort ascending
+      --limit int          Keep at most N rows after sorting (local)
+      --since string       Keep rows on or after this day (YYYY-MM-DD, local filter)
+      --sort string        Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
+      --until string       Keep rows on or before this day (YYYY-MM-DD, local filter)
 ```
 
 ## bwt stats pages
@@ -1097,11 +1097,11 @@ bwt stats pages [flags]
 ```
 
 ```text
-      --asc            Sort ascending
-      --limit int      Keep at most N rows after sorting (local)
-      --since string   Keep rows on or after this day (YYYY-MM-DD, local filter)
-      --sort string    Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
-      --until string   Keep rows on or before this day (YYYY-MM-DD, local filter)
+      --asc[=true|false]   Sort ascending
+      --limit int          Keep at most N rows after sorting (local)
+      --since string       Keep rows on or after this day (YYYY-MM-DD, local filter)
+      --sort string        Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
+      --until string       Keep rows on or before this day (YYYY-MM-DD, local filter)
 ```
 
 ## bwt stats queries
@@ -1120,11 +1120,11 @@ bwt stats queries [flags]
 ```
 
 ```text
-      --asc            Sort ascending
-      --limit int      Keep at most N rows after sorting (local)
-      --since string   Keep rows on or after this day (YYYY-MM-DD, local filter)
-      --sort string    Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
-      --until string   Keep rows on or before this day (YYYY-MM-DD, local filter)
+      --asc[=true|false]   Sort ascending
+      --limit int          Keep at most N rows after sorting (local)
+      --since string       Keep rows on or after this day (YYYY-MM-DD, local filter)
+      --sort string        Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
+      --until string       Keep rows on or before this day (YYYY-MM-DD, local filter)
 ```
 
 ## bwt stats query-pages
@@ -1143,11 +1143,11 @@ bwt stats query-pages QUERY [flags]
 ```
 
 ```text
-      --asc            Sort ascending
-      --limit int      Keep at most N rows after sorting (local)
-      --since string   Keep rows on or after this day (YYYY-MM-DD, local filter)
-      --sort string    Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
-      --until string   Keep rows on or before this day (YYYY-MM-DD, local filter)
+      --asc[=true|false]   Sort ascending
+      --limit int          Keep at most N rows after sorting (local)
+      --since string       Keep rows on or after this day (YYYY-MM-DD, local filter)
+      --sort string        Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
+      --until string       Keep rows on or before this day (YYYY-MM-DD, local filter)
 ```
 
 ## bwt stats query-traffic
@@ -1166,11 +1166,11 @@ bwt stats query-traffic QUERY [flags]
 ```
 
 ```text
-      --asc            Sort ascending
-      --limit int      Keep at most N rows after sorting (local)
-      --since string   Keep rows on or after this day (YYYY-MM-DD, local filter)
-      --sort string    Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
-      --until string   Keep rows on or before this day (YYYY-MM-DD, local filter)
+      --asc[=true|false]   Sort ascending
+      --limit int          Keep at most N rows after sorting (local)
+      --since string       Keep rows on or after this day (YYYY-MM-DD, local filter)
+      --sort string        Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
+      --until string       Keep rows on or before this day (YYYY-MM-DD, local filter)
 ```
 
 ## bwt stats summary
@@ -1208,11 +1208,11 @@ bwt stats traffic [flags]
 ```
 
 ```text
-      --asc            Sort ascending
-      --limit int      Keep at most N rows after sorting (local)
-      --since string   Keep rows on or after this day (YYYY-MM-DD, local filter)
-      --sort string    Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
-      --until string   Keep rows on or before this day (YYYY-MM-DD, local filter)
+      --asc[=true|false]   Sort ascending
+      --limit int          Keep at most N rows after sorting (local)
+      --since string       Keep rows on or after this day (YYYY-MM-DD, local filter)
+      --sort string        Sort locally by date, clicks, impressions, ctr, query, position, avg-click-position, or avg-impression-position (descending)
+      --until string       Keep rows on or before this day (YYYY-MM-DD, local filter)
 ```
 
 ## bwt status
@@ -1226,7 +1226,7 @@ bwt status [flags]
 ```
 
 ```text
-      --verify   Check access with one GetUserSites call
+      --verify[=true|false]   Check access with one GetUserSites call
 ```
 
 ## bwt submit
@@ -1283,9 +1283,9 @@ bwt submit urls [URL...] [flags]
 ```
 
 ```text
-      --batch-size int   URLs per batch (1-500) (default 500)
-      --check-quota      Read the URL submission quota first
-      --file string      Read URLs from a file, one per line (- for stdin)
+      --batch-size int             URLs per batch (1-500) (default 500)
+      --check-quota[=true|false]   Read the URL submission quota first
+      --file string                Read URLs from a file, one per line (- for stdin)
 ```
 
 ## bwt update
@@ -1319,7 +1319,7 @@ bwt update [flags]
 ```
 
 ```text
-      --check   Only report the current and latest versions (always checks the github.com releases page)
+      --check[=true|false]   Only report the current and latest versions (always checks the github.com releases page)
 ```
 
 ## bwt url
@@ -1346,7 +1346,7 @@ bwt url children URL [flags]
 ```
 
 ```text
-      --all                 Fetch pages until the end (bounded by --max-pages)
+      --all[=true|false]    Fetch pages until the end (bounded by --max-pages)
       --crawl-date string   Crawled within: any, last-week, last-two-weeks, last-three-weeks (default "any")
       --discovered string   Discovered within: any, last-week, last-month (default "any")
       --doc-flags string    Comma list: blocked-by-robots, malware
@@ -1366,9 +1366,9 @@ bwt url children-traffic URL [flags]
 ```
 
 ```text
-      --all             Fetch pages until the end (bounded by --max-pages)
-      --max-pages int   Upper bound on pages fetched with --all (default 100)
-      --page int        Page to fetch, starting at 0
+      --all[=true|false]   Fetch pages until the end (bounded by --max-pages)
+      --max-pages int      Upper bound on pages fetched with --all (default 100)
+      --page int           Page to fetch, starting at 0
 ```
 
 ## bwt url info
@@ -1431,7 +1431,7 @@ bwt users list [flags]
 ```
 
 ```text
-      --all-subdomains   Include users of all subdomains
+      --all-subdomains[=true|false]   Include users of all subdomains
 ```
 
 ## bwt users remove
