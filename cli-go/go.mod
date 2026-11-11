@@ -3,7 +3,7 @@ module github.com/piyush-gambhir/bing-webmaster-cli/cli-go
 go 1.27.3
 
 require (
-	github.com/gofrs/flock v0.13.1
+	github.com/gofrs/flock v0.13.2
 	github.com/google/renameio/v2 v2.0.2
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.1.0
