@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	CacheFile = "update-check.json"
+	CacheFile     = "update-check.json"
 	CheckInterval = 24 * time.Hour
-	CheckTimeout = 3 * time.Second
-	NoticeWait = time.Second
+	CheckTimeout  = 3 * time.Second
+	NoticeWait    = time.Second
 )
 
 type Cache struct {

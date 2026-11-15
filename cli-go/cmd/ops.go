@@ -17,11 +17,11 @@ type opSpec struct {
 	op                        string
 	args                      []string
 	cols                      []output.Col
-	confirm string
-	setup   func(*cobra.Command) func() (map[string]any, error)
-	validate func([]string) error
-	domainOK bool
-	onResult func(any) error
+	confirm                   string
+	setup                     func(*cobra.Command) func() (map[string]any, error)
+	validate                  func([]string) error
+	domainOK                  bool
+	onResult                  func(any) error
 }
 
 func annotate(c *cobra.Command, methods ...string) *cobra.Command {

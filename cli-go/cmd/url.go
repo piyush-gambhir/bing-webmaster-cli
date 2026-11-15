@@ -33,7 +33,7 @@ func (a *app) urlCmd() *cobra.Command {
 type pager struct {
 	page, maxPages int
 	all            bool
-	limit int
+	limit          int
 }
 
 func (p *pager) flags(c *cobra.Command) {

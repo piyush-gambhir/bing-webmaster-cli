@@ -23,10 +23,10 @@ import (
 )
 
 const (
-	Repo = "piyush-gambhir/bing-webmaster-cli"
+	Repo         = "piyush-gambhir/bing-webmaster-cli"
 	SourceUpdate = "git pull && make install (in your bing-webmaster-cli checkout)"
-	MethodSelf = "self"
-	MethodGo   = "go"
+	MethodSelf   = "self"
+	MethodGo     = "go"
 
 	LatestTimeout = 15 * time.Second
 

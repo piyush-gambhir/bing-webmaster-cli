@@ -73,7 +73,7 @@ func ServiceFor(base, configPath, defaultPath string) string {
 }
 
 type Saved struct {
-	Backend Backend
+	Backend        Backend
 	FallbackReason error
 }
 

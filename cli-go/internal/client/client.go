@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	KeyBase = "https://ssl.bing.com/webmaster/api.svc/json"
+	KeyBase     = "https://ssl.bing.com/webmaster/api.svc/json"
 	BearerBase  = "https://www.bing.com/webmaster/api.svc/json"
 	maxResponse = 32 << 20
 )
@@ -31,9 +31,9 @@ type Planned struct {
 }
 
 type Client struct {
-	HTTP   *http.Client
-	Base   string
-	APIKey string
+	HTTP     *http.Client
+	Base     string
+	APIKey   string
 	Token    func(context.Context) (string, error)
 	Log      io.Writer
 	ReadOnly bool
