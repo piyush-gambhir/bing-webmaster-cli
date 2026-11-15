@@ -6,7 +6,6 @@ import (
 	"unicode"
 )
 
-// ErrorNames is Bing's ApiErrorCode enum.
 var ErrorNames = map[int]string{
 	0: "None", 1: "InternalError", 2: "UnknownError", 3: "InvalidApiKey", 4: "ThrottleUser",
 	5: "ThrottleHost", 6: "UserBlocked", 7: "InvalidUrl", 8: "InvalidParameter", 9: "TooManySites",
@@ -31,7 +30,6 @@ var hints = map[int]string{
 	16: "Bing reports this method as deprecated",
 }
 
-// APIError is a failed Bing call. Code is -1 when Bing returned no fault body.
 type APIError struct {
 	Method     string `json:"method" yaml:"method"`
 	HTTPStatus int    `json:"http_status" yaml:"http_status"`
@@ -71,8 +69,6 @@ func newFault(method string, status, code int, serverMessage string) *APIError {
 	return e
 }
 
-// clean makes server text safe for a terminal: control characters become spaces
-// and long text is cut.
 func clean(s string, limit int) string {
 	s = strings.Map(func(r rune) rune {
 		if unicode.IsControl(r) {

@@ -33,7 +33,6 @@ func (a *app) urlCmd() *cobra.Command {
 type pager struct {
 	page, maxPages int
 	all            bool
-	// limit is the largest page number the method's parameter type allows.
 	limit int
 }
 
@@ -54,10 +53,6 @@ func (p *pager) validate(limit int) error {
 	return nil
 }
 
-// walk fetches pages starting at p.page. fetch returns the page's rows and, when
-// known, the total page count. It stops at an empty page, at totalPages, at
-// --max-pages, at the method's largest page number, or when a page repeats the
-// previous one.
 func (p *pager) walk(ctx context.Context, fetch func(context.Context, int) ([]map[string]any, int, error)) (rows []map[string]any, fetched int, complete bool, err error) {
 	prev := ""
 	for page := p.page; ; page++ {
@@ -72,7 +67,6 @@ func (p *pager) walk(ctx context.Context, fetch func(context.Context, int) ([]ma
 		if len(items) == 0 {
 			return rows, fetched, true, nil
 		}
-		// Compare whole pages: consecutive pages can legitimately share a first row.
 		b, _ := json.Marshal(items)
 		if string(b) == prev {
 			return rows, fetched, false, fmt.Errorf("page %d repeated the previous page; stopping", page)
@@ -189,7 +183,6 @@ func (a *app) childrenTrafficCmd() *cobra.Command {
 	return c
 }
 
-// rowsOf converts a list result's dates (unless --raw) and returns its rows.
 func (a *app) rowsOf(v any) []map[string]any {
 	if !a.raw {
 		v = client.Clean(v)

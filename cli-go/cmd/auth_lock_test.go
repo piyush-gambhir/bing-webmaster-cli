@@ -14,7 +14,6 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
-// execWith runs the CLI under ctx so a test can bound how long it waits on a lock.
 func execWith(ctx context.Context, f *fake, input string, args ...string) error {
 	var out, errOut bytes.Buffer
 	a := &app{in: strings.NewReader(input), out: &out, errOut: &errOut, transport: f.transport()}
@@ -70,7 +69,6 @@ func TestLoginKeepsASiteChosenByAnotherProcess(t *testing.T) {
 	}
 	setSite("https://a.example.com/")
 	two := `{"d":[{"Url":"https://a.example.com/"},{"Url":"https://b.example.com/"}]}`
-	// `bwt sites use B` runs while login is checking the key with Bing.
 	f := &fake{handle: func(r *http.Request, body string) *http.Response {
 		setSite("https://b.example.com/")
 		return reply(200, two)

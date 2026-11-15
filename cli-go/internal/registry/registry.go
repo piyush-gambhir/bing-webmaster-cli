@@ -1,7 +1,3 @@
-// Package registry lists every method of the Bing Webmaster JSON API with its
-// HTTP verb, parameters, and effect. Commands, --read-only enforcement, the raw
-// `api` command, and the coverage tests all read this table, so the effect of a
-// call is decided once, by behavior rather than by HTTP verb.
 package registry
 
 import "sort"
@@ -21,8 +17,6 @@ const (
 	Obsolete     Status = "obsolete"
 )
 
-// Param is one documented method parameter. Type uses the wire shape:
-// string, bool, int16, uint16, int32, datetime, string[], or a data contract name.
 type Param struct {
 	Name string
 	Type string
@@ -43,7 +37,6 @@ func p(name, typ string) Param { return Param{Name: name, Type: typ} }
 
 var site = p("siteUrl", "string")
 
-// Ops is every method of IWebmasterApi (62), grouped as in the documentation.
 var Ops = []Op{
 	{Name: "GetUserSites", HTTP: "GET", Returns: "Site[]", Effect: Read, Status: Implemented, Group: "Sites"},
 	{Name: "AddSite", HTTP: "POST", Params: []Param{site}, Returns: "void", Effect: Write, Status: Implemented, Group: "Sites"},
@@ -132,13 +125,11 @@ var byName = func() map[string]Op {
 	return m
 }()
 
-// Lookup returns the operation with this exact Bing method name.
 func Lookup(name string) (Op, bool) {
 	op, ok := byName[name]
 	return op, ok
 }
 
-// Names returns all method names, sorted.
 func Names() []string {
 	names := make([]string, 0, len(Ops))
 	for _, op := range Ops {

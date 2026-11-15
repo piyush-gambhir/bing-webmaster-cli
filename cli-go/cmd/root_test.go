@@ -26,7 +26,6 @@ func reply(status int, body string) *http.Response {
 	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body))}
 }
 
-// fake records requests and answers them from a handler.
 type fake struct {
 	mu       sync.Mutex
 	requests []*http.Request
@@ -137,7 +136,6 @@ func TestAPIKeyLoginLifecycle(t *testing.T) {
 	if res = run(t, f, "", "auth", "status"); res.err == nil {
 		t.Fatal("status succeeded after logout")
 	}
-	// The site survives logout for the next login.
 	if cfg, _ := os.ReadFile(os.Getenv("BWT_CONFIG")); !strings.Contains(string(cfg), "https://www.example.com/") {
 		t.Fatal("site lost on logout")
 	}
@@ -160,7 +158,6 @@ func TestKeychainUnavailableNeedsExplicitInsecureStorage(t *testing.T) {
 	if err != nil || (runtime.GOOS != "windows" && info.Mode().Perm() != 0600) {
 		t.Fatalf("secrets file: %v %v", info, err)
 	}
-	// Commands read the key back from the file backend.
 	res = run(t, f, "", "sites", "list", "-o", "json")
 	if res.err != nil || !strings.Contains(res.out, "www.example.com") {
 		t.Fatalf("sites list: %v %s", res.err, res.out)
@@ -185,8 +182,6 @@ func TestLoginRejectsABadKeyAndSavesNothing(t *testing.T) {
 	if res := run(t, nil, "", "auth", "login", "--no-input"); res.err == nil || !strings.Contains(res.err.Error(), "nonempty") {
 		t.Fatalf("empty key: %v", res.err)
 	}
-	// --no-verify saves without a network call (for a key that is not active yet);
-	// the hidden --with-api-key alias still works.
 	f2 := &fake{}
 	if res := run(t, f2, "new-key\n", "auth", "login", "--with-api-key", "--no-verify", "--no-input"); res.err != nil || f2.count() != 0 {
 		t.Fatalf("--no-verify: %v calls=%d", res.err, f2.count())
@@ -242,7 +237,6 @@ func TestReadOnlyBlocksWritesBeforeNetwork(t *testing.T) {
 			t.Errorf("%v: err=%v calls=%d", args, res.err, f.count())
 		}
 	}
-	// Reads, including the POST read GetChildrenUrlInfo, stay allowed.
 	f := &fake{handle: func(r *http.Request, body string) *http.Response { return reply(200, `{"d":[]}`) }}
 	for _, args := range [][]string{{"url", "children", "https://www.example.com/"}, {"api", "GetUserSites"}, {"crawl", "issues"}} {
 		if res := run(t, f, "", append(args, "--read-only")...); res.err != nil {
@@ -387,7 +381,6 @@ func TestStructuredErrorsAndRedaction(t *testing.T) {
 	isolate(t)
 	t.Setenv("BWT_API_KEY", "super-secret-key")
 	var out, errOut bytes.Buffer
-	// A transport error that echoes the request URL, as net/http does, must not leak the key.
 	leaky := roundTrip(func(r *http.Request) (*http.Response, error) {
 		return nil, errors.New("dial tcp: lookup failed for " + r.URL.String())
 	})
@@ -407,7 +400,6 @@ func TestStructuredErrorsAndRedaction(t *testing.T) {
 	}
 }
 
-// lastJSON returns the JSON document at the end of stderr (after verbose log lines).
 func lastJSON(s string) []byte {
 	if i := strings.Index(s, "{"); i >= 0 {
 		return []byte(s[i:])
@@ -453,7 +445,6 @@ func TestBareHostAndLookups(t *testing.T) {
 	}
 }
 
-// testService is the keychain service the CLI uses for the test's config path.
 func testService(t *testing.T) string {
 	t.Helper()
 	st, err := (&app{}).store()

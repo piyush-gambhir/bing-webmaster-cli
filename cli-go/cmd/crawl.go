@@ -11,14 +11,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// crawlIssueFlags is Bing's UrlWithCrawlIssues.CrawlIssues bitmask.
 var crawlIssueFlags = []struct {
 	bit  int
 	name string
 }{{1, "301"}, {2, "302"}, {4, "4xx"}, {8, "5xx"}, {16, "blocked by robots.txt"}, {32, "contains malware"},
 	{64, "important URL blocked by robots.txt"}, {128, "DNS errors"}, {256, "timeout errors"}}
 
-// issueLabels decodes the bitmask; WCF may also send the flag names as text.
 func issueLabels(v any) []string {
 	if s, ok := v.(string); ok && s != "" {
 		if _, err := strconv.Atoi(s); err != nil {

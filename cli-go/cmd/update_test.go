@@ -24,8 +24,6 @@ import (
 
 const noticeText = "A new version of bwt is available"
 
-// updateEnv isolates config, pins the running version, and clears every
-// variable that turns the notice off.
 func updateEnv(t *testing.T, version string) string {
 	t.Helper()
 	isolate(t)
@@ -42,9 +40,6 @@ func updateEnv(t *testing.T, version string) string {
 	return dir
 }
 
-// gh fakes github.com: releases/latest redirects to tag (any other request,
-// such as following that redirect, fails the test), and assets are served
-// from files.
 func gh(t *testing.T, tag string, files map[string][]byte) *fake {
 	return &fake{handle: func(r *http.Request, body string) *http.Response {
 		switch {
@@ -62,8 +57,6 @@ func gh(t *testing.T, tag string, files map[string][]byte) *fake {
 	}}
 }
 
-// runUpdateApp runs bwt with stderr treated as a terminal (or not) and waits
-// for any background release check.
 func runUpdateApp(t *testing.T, f *fake, tty bool, exe string, args ...string) result {
 	t.Helper()
 	var out, errOut bytes.Buffer
@@ -85,7 +78,6 @@ func TestUpdateNoticeChecksOnceAndShowsOncePerDay(t *testing.T) {
 	if f.count() != 1 || c.LatestVersion != "0.1.4" || c.CheckedAt.IsZero() {
 		t.Fatalf("background check: %d requests, cache %+v", f.count(), c)
 	}
-	// Whether the first run printed depends on timing; start from "not shown".
 	c.NotifiedVersion, c.NotifiedAt = "", time.Time{}
 	update.WriteCache(dir, c)
 
@@ -107,7 +99,6 @@ func TestUpdateNoticeChecksOnceAndShowsOncePerDay(t *testing.T) {
 		t.Fatalf("cached check went to the network: %d requests", f.count())
 	}
 
-	// In a Go bin directory the notice points at the source build.
 	t.Setenv("GOBIN", filepath.Dir(exe))
 	c = update.ReadCache(dir)
 	c.NotifiedAt = time.Time{}
@@ -117,7 +108,6 @@ func TestUpdateNoticeChecksOnceAndShowsOncePerDay(t *testing.T) {
 	}
 }
 
-// slow delays every response of f by d, or until the request is cancelled.
 func slow(f *fake, d time.Duration) *fake {
 	h := f.handle
 	f.handle = func(r *http.Request, body string) *http.Response {
@@ -130,8 +120,6 @@ func slow(f *fake, d time.Duration) *fake {
 	return f
 }
 
-// timedRun is runUpdateApp, also returning how long the command itself took
-// (without the background check).
 func timedRun(t *testing.T, f *fake, exe string, args ...string) (result, time.Duration) {
 	t.Helper()
 	var out, errOut bytes.Buffer
@@ -148,21 +136,18 @@ func timedRun(t *testing.T, f *fake, exe string, args ...string) (result, time.D
 
 func TestUpdateNoticeWaitsForTheDaysCheck(t *testing.T) {
 	exe := filepath.Join(t.TempDir(), "bwt")
-	// The day's check answers after the command's output: the notice still prints on this run.
 	updateEnv(t, "0.1.3")
 	res, _ := timedRun(t, slow(gh(t, "v0.1.4", nil), 200*time.Millisecond), exe, "api", "methods", "-o", "json")
 	if res.err != nil || !strings.Contains(res.errOut, noticeText) {
 		t.Fatalf("notice lost to a fast command: %v stderr=%q", res.err, res.errOut)
 	}
 
-	// A check slower than NoticeWait delays the command by at most NoticeWait.
 	dir := updateEnv(t, "0.1.3")
 	res, took := timedRun(t, slow(gh(t, "v0.1.4", nil), update.NoticeWait+500*time.Millisecond), exe, "api", "methods", "-o", "json")
 	if res.err != nil || strings.Contains(res.errOut, noticeText) || took > update.NoticeWait+300*time.Millisecond {
 		t.Fatalf("slow check: %v took %v stderr=%q", res.err, took, res.errOut)
 	}
 
-	// An answer from the cache never waits.
 	update.WriteCache(dir, update.Cache{CheckedAt: time.Now(), LatestVersion: "0.1.3"})
 	f := &fake{}
 	if res, took = timedRun(t, f, exe, "api", "methods"); res.err != nil || f.count() != 0 || took > 300*time.Millisecond {
@@ -197,12 +182,11 @@ func TestUpdateNoticeSuppressed(t *testing.T) {
 			for k, v := range tc.env {
 				t.Setenv(k, v)
 			}
-			f := &fake{} // any request fails the run's check and is counted
+			f := &fake{}
 			exe := filepath.Join(t.TempDir(), "bwt")
 			if res := runUpdateApp(t, f, tc.tty, exe, tc.args...); res.err != nil || f.count() != 0 || strings.Contains(res.errOut, noticeText) {
 				t.Fatalf("no cache: %v requests=%d stderr=%q", res.err, f.count(), res.errOut)
 			}
-			// A fresh cache with a newer release must not print either.
 			update.WriteCache(dir, update.Cache{CheckedAt: time.Now(), LatestVersion: "9.9.9"})
 			if res := runUpdateApp(t, f, tc.tty, exe, tc.args...); res.err != nil || f.count() != 0 || strings.Contains(res.errOut+res.out, noticeText) {
 				t.Fatalf("cached: %v requests=%d stderr=%q", res.err, f.count(), res.errOut)
@@ -213,7 +197,6 @@ func TestUpdateNoticeSuppressed(t *testing.T) {
 
 func TestUpdateCheckJSON(t *testing.T) {
 	dir := updateEnv(t, "0.1.3")
-	// --check bypasses a fresh cache that says nothing is new.
 	update.WriteCache(dir, update.Cache{CheckedAt: time.Now(), LatestVersion: "0.1.3"})
 	f := gh(t, "v0.1.4", nil)
 	exe := filepath.Join(t.TempDir(), "bwt")
@@ -230,7 +213,6 @@ func TestUpdateCheckJSON(t *testing.T) {
 	if c := update.ReadCache(dir); c.LatestVersion != "0.1.4" {
 		t.Fatalf("check not cached: %+v", c)
 	}
-	// version reads that cache and never the network.
 	res = runUpdateApp(t, f, true, exe, "version", "-o", "json")
 	if !strings.Contains(res.out, `"latest": "0.1.4"`) || !strings.Contains(res.out, `"update_available": true`) || f.count() != 1 {
 		t.Fatalf("version: %s requests=%d", res.out, f.count())
@@ -292,7 +274,6 @@ func TestUpdateInstalls(t *testing.T) {
 	if b, _ := os.ReadFile(exe); string(b) != "new bwt" {
 		t.Fatalf("exe holds %q", b)
 	}
-	// The check that found the release is kept, so the notifier agrees with it.
 	if c := update.ReadCache(dir); c.LatestVersion != "0.1.4" || time.Since(c.CheckedAt) > time.Minute {
 		t.Fatalf("update result not cached: %+v", c)
 	}

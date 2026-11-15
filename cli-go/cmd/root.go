@@ -28,17 +28,10 @@ type app struct {
 	dryRun, yes, raw                           bool
 	in                                         io.Reader
 	out, errOut                                io.Writer
-	// transport replaces the network for tests; nil uses the default transport.
 	transport http.RoundTripper
-	// openBrowser replaces the system browser for tests.
 	openBrowser func(string) error
-	// exePath and stderrTTY replace the running executable's path and stderr
-	// terminal detection for tests.
 	exePath   string
 	stderrTTY func() bool
-	// updateCheck carries the release check from PersistentPreRun to
-	// PersistentPostRun; checks tracks its background request, and
-	// checkStarted is set when this run sent it.
 	updateCheck  chan update.Cache
 	checks       sync.WaitGroup
 	checkStarted bool
@@ -59,7 +52,6 @@ func newRoot(a *app) *cobra.Command {
 			"Data goes to stdout and diagnostics to stderr. --read-only blocks every state change.",
 		SilenceUsage: true, SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// Safety settings from the environment are sticky: an explicit false flag cannot undo them.
 			if envBool("BWT_READ_ONLY") {
 				a.readOnly = true
 			}
@@ -142,11 +134,8 @@ func newRoot(a *app) *cobra.Command {
 	return root
 }
 
-// Run executes the CLI and returns the process exit code. Errors go to stderr,
-// structured in JSON and YAML modes, with credentials redacted.
 func Run(ctx context.Context, args []string, in io.Reader, out, errOut io.Writer) int {
 	if runtime.GOOS == "windows" {
-		// A Windows self-update leaves the replaced bwt.exe.old behind.
 		if exe, err := os.Executable(); err == nil {
 			if exe, err = filepath.EvalSymlinks(exe); err == nil {
 				update.RemoveLeftover(exe)

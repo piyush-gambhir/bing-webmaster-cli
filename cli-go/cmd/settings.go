@@ -143,7 +143,6 @@ func (a *app) userRemoveCmd() *cobra.Command {
 	return c
 }
 
-// Bing documents that query parameters "may contain only unreserved letters and colon".
 var paramName = regexp.MustCompile(`^[A-Za-z0-9._~:-]+$`)
 
 func (a *app) paramsCmd() *cobra.Command {
@@ -221,7 +220,6 @@ func (a *app) blockAddCmd() *cobra.Command {
 				return err
 			}
 		}
-		// Date and DaysToExpire are left for Bing to set, as in its own sample request.
 		params := map[string]any{"siteUrl": site, "blockedUrl": map[string]any{"Url": args[0], "EntityType": entity, "RequestType": req}}
 		result, err := cl.Call(cmd.Context(), "AddBlockedUrl", params)
 		if err != nil {

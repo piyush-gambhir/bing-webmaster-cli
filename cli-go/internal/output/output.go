@@ -1,5 +1,3 @@
-// Package output renders command results as table, JSON, YAML, or CSV. JSON and
-// YAML keep the full data; tables and CSV show rows with chosen columns.
 package output
 
 import (
@@ -19,23 +17,16 @@ func Valid(format string) bool {
 	return format == "table" || format == "json" || format == "yaml" || format == "csv"
 }
 
-// Col is one table or CSV column. Value derives the cell from the row; when nil
-// the row's Key is used.
 type Col struct {
 	Header string
 	Key    string
 	Value  func(map[string]any) any
 }
 
-// Print renders data. For table and CSV, cols choose the columns of row-shaped
-// data; without cols they are inferred.
 func Print(w io.Writer, format string, data any, cols ...Col) error {
 	return View(w, format, data, nil, cols...)
 }
 
-// View prints full for JSON and YAML, and rows (when non-nil) for table and CSV.
-// Commands use it to give machines an envelope with context while people see a
-// plain table.
 func View(w io.Writer, format string, full any, rows []map[string]any, cols ...Col) error {
 	if !Valid(format) {
 		return fmt.Errorf("unsupported output %q; use table, json, yaml, or csv", format)
@@ -155,7 +146,6 @@ func writeCSV(w io.Writer, rows []map[string]any, cols []Col) error {
 	cw := csv.NewWriter(w)
 	headers := make([]string, len(cols))
 	for i, c := range cols {
-		// Headers can come from remote JSON keys when columns are inferred.
 		headers[i] = csvCell(c.Header)
 	}
 	if err := cw.Write(headers); err != nil {
@@ -260,8 +250,6 @@ func text(v any) string {
 	}
 }
 
-// cell sanitizes a value for a terminal table: control characters, including
-// escape sequences, become spaces.
 func cell(v any, empty string) string {
 	if v == nil {
 		return empty
@@ -279,7 +267,6 @@ func csvCell(v any) string {
 		return ""
 	}
 	s := text(v)
-	// Neutralize spreadsheet formula injection from remote data.
 	if s != "" && strings.ContainsRune("=+-@\t\r", rune(s[0])) {
 		if _, err := json.Number(s).Float64(); err != nil {
 			s = "'" + s

@@ -34,7 +34,6 @@ if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
   echo 'Checksum verification failed.' >&2
   exit 1
 fi
-# Extract only the expected binary, not arbitrary archive paths.
 tar -xzf "$tmp/$asset" -C "$tmp" bwt
 if [ ! -f "$tmp/bwt" ] || [ -L "$tmp/bwt" ]; then
   echo 'Archive does not contain a regular bwt binary.' >&2
@@ -43,7 +42,6 @@ fi
 mkdir -p "$install_dir"
 install -m 755 "$tmp/bwt" "$install_dir/bwt"
 echo "Installed $install_dir/bwt. Ensure $install_dir is on PATH."
-# Another tool (Bitcoin Wallet Tracker) also installs a bwt executable.
 found=$(command -v bwt 2>/dev/null || true)
 if [ -n "$found" ] && [ "$found" != "$install_dir/bwt" ]; then
   echo "Warning: $found comes first on PATH and is a different bwt. Put $install_dir earlier on PATH or alias this one." >&2

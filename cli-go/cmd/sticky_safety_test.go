@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-// Safety settings from the environment cannot be switched off by a flag: an agent
-// runner sets BWT_READ_ONLY and must be able to rely on it.
 func TestEnvironmentReadOnlyIsSticky(t *testing.T) {
 	t.Setenv("BWT_READ_ONLY", "true")
 	t.Setenv("BWT_NO_UPDATE_NOTIFIER", "1")

@@ -19,7 +19,6 @@ import (
 	"golang.org/x/term"
 )
 
-// webmasterHome is where the API key lives: Settings > API Access > API Key.
 const webmasterHome = "https://www.bing.com/webmasters"
 
 const revokeNote = "Logging out removes the key from this machine only. To invalidate it, regenerate it in Bing Webmaster Tools > Settings > API Access."
@@ -56,13 +55,11 @@ func (a *app) profileName(cfg *config.Config) (string, error) {
 	return name, config.ValidName(name)
 }
 
-// terminal reports whether input is an interactive terminal.
 func (a *app) terminal() bool {
 	f, ok := a.in.(*os.File)
 	return ok && term.IsTerminal(int(f.Fd()))
 }
 
-// readSecret reads one secret from a hidden prompt, or from stdin when it is not a terminal.
 func (a *app) readSecret(prompt string) (string, error) {
 	if a.terminal() {
 		if a.noInput {
@@ -87,8 +84,6 @@ func (a *app) readSecret(prompt string) (string, error) {
 	return strings.TrimSpace(string(b)), nil
 }
 
-// showAPIKeySteps tells an interactive user where the key is and opens Bing
-// Webmaster Tools; the URL is printed too in case no browser opens.
 func (a *app) showAPIKeySteps() {
 	fmt.Fprintf(a.errOut, "Log in with your Bing Webmaster Tools API key (one key covers all your sites):\n"+
 		"  1. Opening %s\n"+
@@ -101,7 +96,6 @@ func (a *app) showAPIKeySteps() {
 	_ = open(webmasterHome)
 }
 
-// plural renders "1 site" or "3 sites".
 func plural(n int, noun string) string {
 	if n == 1 {
 		return "1 " + noun
@@ -160,7 +154,6 @@ func (a *app) loginCmd() *cobra.Command {
 		if key == "" || strings.ContainsAny(key, " \t\r\n") {
 			return fmt.Errorf("the API key must be nonempty and contain no whitespace")
 		}
-		// Check the key before saving anything, so a typo never lands in a profile.
 		var sites []string
 		if !noVerify {
 			data, err := a.clientFor(&creds{kind: "api_key", apiKey: key}).Call(ctx, "GetUserSites", map[string]any{})
@@ -175,7 +168,6 @@ func (a *app) loginCmd() *cobra.Command {
 			}
 			sort.Strings(sites)
 		}
-		// Choose a default site before taking the lock, since it may prompt.
 		chosen, picked := cfg.Profiles[name].Site, false
 		switch {
 		case noVerify, chosen != "" && slices.Contains(sites, chosen):
@@ -196,8 +188,6 @@ func (a *app) loginCmd() *cobra.Command {
 			return err
 		}
 		defer unlock()
-		// Re-read under the lock: another process may have changed this profile
-		// (its storage backend, site, or IndexNow keys) meanwhile.
 		fresh, err := config.Load(path)
 		if err != nil {
 			return err
@@ -207,8 +197,6 @@ func (a *app) loginCmd() *cobra.Command {
 		if err != nil {
 			return fmt.Errorf("%w\nNo OS keychain is available. Rerun with --insecure-storage to keep the key in a 0600 file, or set BWT_API_KEY without saving", err)
 		}
-		// Delete what the profile held before: v0.1.1 OAuth tokens, and the old key
-		// when the backend changed. The new key is saved, so a failure only warns.
 		backends := []secrets.Backend{saved.Backend}
 		if old := secrets.Backend(previous.TokenStore); old != "" && old != saved.Backend {
 			backends = append(backends, old)
@@ -230,9 +218,9 @@ func (a *app) loginCmd() *cobra.Command {
 		}
 		switch {
 		case noVerify:
-			chosen = previous.Site // unchecked key: keep whatever site the profile has now
+			chosen = previous.Site
 		case !picked && previous.Site != "" && slices.Contains(sites, previous.Site):
-			chosen = previous.Site // another process may have run `bwt sites use` meanwhile
+			chosen = previous.Site
 		}
 		profile := config.Profile{Auth: config.AuthAPIKey, TokenStore: string(saved.Backend), Site: chosen, IndexNow: previous.IndexNow}
 		if err := config.Update(ctx, path, func(c *config.Config) error {
@@ -262,7 +250,6 @@ func (a *app) loginCmd() *cobra.Command {
 	return c
 }
 
-// pick shows a numbered list on stderr; it returns "" without a terminal.
 func (a *app) pick(options []string) string {
 	if a.noInput || !a.terminal() {
 		return ""
@@ -392,7 +379,6 @@ func (a *app) logoutCmd() *cobra.Command {
 				return err
 			}
 			defer unlock()
-			// Re-read under the lock so we delete from the backend that holds the key now.
 			if cfg, err = config.Load(path); err != nil {
 				return err
 			}
@@ -401,8 +387,6 @@ func (a *app) logoutCmd() *cobra.Command {
 				return fmt.Errorf("profile %q not found", name)
 			}
 			if p.TokenStore != "" {
-				// Also delete v0.1.1 OAuth tokens. Fail before forgetting the backend,
-				// or nothing would know where the leftovers live.
 				for _, kind := range append([]string{"api_key"}, auth.LegacyKinds...) {
 					if err := store.Delete(cmd.Context(), secrets.Backend(p.TokenStore), auth.SecretKey(name, kind)); err != nil {
 						return fmt.Errorf("could not delete the saved %s credential: %w", kind, err)

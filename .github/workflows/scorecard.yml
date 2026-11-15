@@ -1,5 +1,4 @@
 name: Scorecard
-# OpenSSF Scorecard: supply-chain security checks for this public repository.
 on:
   branch_protection_rule:
   schedule:

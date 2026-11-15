@@ -1,6 +1,3 @@
-// Package config stores named profiles in an XDG YAML file. API keys live in the
-// OS keychain, or in a separate 0600 file only when the user chose
-// --insecure-storage.
 package config
 
 import (
@@ -17,15 +14,12 @@ import (
 
 const AuthAPIKey = "api_key"
 
-// IndexNowKey is a site's IndexNow key. IndexNow keys are public by design
-// (hosted at https://host/KEY.txt), so they are kept in the config file.
 type IndexNowKey struct {
 	Key         string `yaml:"key"`
 	KeyLocation string `yaml:"key_location,omitempty"`
 }
 
 type Profile struct {
-	// Auth is api_key; empty means the profile only holds IndexNow keys or a site.
 	Auth       string                 `yaml:"auth,omitempty"`
 	TokenStore string                 `yaml:"token_store,omitempty"`
 	Site       string                 `yaml:"site,omitempty"`
@@ -37,8 +31,6 @@ type Config struct {
 	Profiles       map[string]Profile `yaml:"profiles"`
 }
 
-// Dir is the configuration directory: the directory of BWT_CONFIG when set,
-// otherwise $XDG_CONFIG_HOME/bing-webmaster-cli.
 func Dir() (string, error) {
 	p, err := Path()
 	if err != nil {
@@ -47,8 +39,6 @@ func Dir() (string, error) {
 	return filepath.Dir(p), nil
 }
 
-// DefaultPath is the configuration path when neither BWT_CONFIG nor
-// XDG_CONFIG_HOME is set.
 func DefaultPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -72,7 +62,6 @@ func Path() (string, error) {
 	return filepath.Join(base, "bing-webmaster-cli", "config.yaml"), nil
 }
 
-// SecretsPath is the opt-in plaintext secrets file next to the config.
 func SecretsPath() (string, error) {
 	dir, err := Dir()
 	if err != nil {
@@ -90,7 +79,6 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read config: %w", err)
 	}
-	// Do not echo YAML parser errors: a malformed line could contain a credential.
 	if err := yaml.Unmarshal(b, c); err != nil {
 		return nil, fmt.Errorf("invalid YAML config at %s", path)
 	}
@@ -100,7 +88,6 @@ func Load(path string) (*Config, error) {
 	return c, nil
 }
 
-// Update applies mutate under an exclusive lock and writes atomically.
 func Update(ctx context.Context, path string, mutate func(*Config) error) error {
 	unlock, err := Lock(ctx, path+".lock")
 	if err != nil {
@@ -121,7 +108,6 @@ func Update(ctx context.Context, path string, mutate func(*Config) error) error 
 	return atomicWrite(path, b)
 }
 
-// Lock takes an exclusive cross-process lock on lockPath, waiting up to 10s.
 func Lock(ctx context.Context, lockPath string) (func(), error) {
 	if err := os.MkdirAll(filepath.Dir(lockPath), 0700); err != nil {
 		return nil, err
@@ -143,7 +129,6 @@ func Lock(ctx context.Context, lockPath string) (func(), error) {
 	return func() { _ = lock.Unlock() }, nil
 }
 
-// ProfileName resolves the profile to use: flag, then BWT_PROFILE, then the saved current profile.
 func (c *Config) ProfileName(flag string) string {
 	if flag != "" {
 		return flag
@@ -154,7 +139,6 @@ func (c *Config) ProfileName(flag string) string {
 	return c.CurrentProfile
 }
 
-// ValidName checks a profile name; names are used in keychain keys and file names.
 func ValidName(name string) error {
 	if name == "" || strings.TrimSpace(name) != name || strings.ContainsAny(name, ":/\\\r\n\t") || len(name) > 64 {
 		return fmt.Errorf("profile name must be 1-64 characters without spaces at the ends, slashes, colons, or control characters")

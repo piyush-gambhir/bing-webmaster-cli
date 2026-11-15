@@ -18,7 +18,6 @@ func ctrCol() output.Col {
 	return output.Col{Header: "ctr", Value: func(r map[string]any) any { return stats.CTR(r) }}
 }
 
-// queryStatsCols serve QueryStats results; label names what the Query field holds.
 func queryStatsCols(label string) []output.Col {
 	return []output.Col{col(label, "Query"), col("date", "Date"), col("clicks", "Clicks"), col("impressions", "Impressions"), ctrCol(),
 		col("avg_click_position", "AvgClickPosition"), col("avg_impression_position", "AvgImpressionPosition")}

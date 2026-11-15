@@ -10,9 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TestAgentSafetyCommandManifest makes every runnable command part of a
-// reviewed safety contract. Adding, removing, or reclassifying a command
-// requires an intentional update of expectedDigest.
 func TestAgentSafetyCommandManifest(t *testing.T) {
 	dangerous := map[string]bool{
 		"add": true, "remove": true, "submit": true, "verify": true, "request": true, "set-settings": true,

@@ -35,8 +35,6 @@ func loadSnapshot(t *testing.T) snapshot {
 
 var paramList = regexp.MustCompile(`\(([^()]*)\);\s*$`)
 
-// The registry must describe exactly the methods in the vendored documentation
-// snapshot, with the same HTTP verb, parameter names, and obsolete markers.
 func TestRegistryMatchesSnapshot(t *testing.T) {
 	s := loadSnapshot(t)
 	if len(Ops) != len(s.Methods) {
@@ -76,8 +74,6 @@ func TestRegistryMatchesSnapshot(t *testing.T) {
 	}
 }
 
-// Effects follow behavior: GET methods only read, and every POST changes state
-// except GetChildrenUrlInfo, which documents a read over POST.
 func TestEffects(t *testing.T) {
 	for _, op := range Ops {
 		switch {

@@ -7,13 +7,8 @@ import (
 	"time"
 )
 
-// Microsoft (WCF) JSON dates look like /Date(1315349995284-0700)/: milliseconds
-// since the Unix epoch, optionally followed by the sender's UTC offset. The
-// offset describes the local time of that instant; it is not added again.
 var msDate = regexp.MustCompile(`^/Date\((-?\d+)([+-]\d{4})?\)/$`)
 
-// ParseMSDate converts a Microsoft JSON date. The result keeps the offset as its
-// zone so RFC 3339 output shows the same wall clock Bing used.
 func ParseMSDate(s string) (time.Time, bool) {
 	m := msDate.FindStringSubmatch(s)
 	if m == nil {
@@ -30,7 +25,7 @@ func ParseMSDate(s string) (time.Time, bool) {
 	if m[2] != "" {
 		hours, _ := strconv.Atoi(m[2][1:3])
 		minutes, _ := strconv.Atoi(m[2][3:5])
-		if hours > 23 || minutes > 59 { // not an offset RFC 3339 can express
+		if hours > 23 || minutes > 59 {
 			return time.Time{}, false
 		}
 		offset := hours*3600 + minutes*60
@@ -42,18 +37,12 @@ func ParseMSDate(s string) (time.Time, bool) {
 	return t, rfc3339Year(t)
 }
 
-// rfc3339Year reports whether t's year fits RFC 3339's four digits. Year 0 is
-// allowed: .NET's DateTime.MinValue with a negative offset lands there. Values
-// outside the range are left as the original string.
 func rfc3339Year(t time.Time) bool { return t.Year() >= 0 && t.Year() <= 9999 }
 
-// FormatMSDate renders t for request bodies, using UTC.
 func FormatMSDate(t time.Time) string {
 	return fmt.Sprintf("/Date(%d+0000)/", t.UnixMilli())
 }
 
-// ConvertDates returns a copy of v with every Microsoft JSON date string replaced
-// by RFC 3339. Other values are unchanged.
 func ConvertDates(v any) any {
 	switch x := v.(type) {
 	case map[string]any:
@@ -78,8 +67,6 @@ func ConvertDates(v any) any {
 	}
 }
 
-// Clean prepares Bing data for output: Microsoft JSON dates become RFC 3339 and
-// the WCF "__type" metadata Bing adds to objects is dropped. --raw skips it.
 func Clean(v any) any { return stripType(ConvertDates(v)) }
 
 func stripType(v any) any {
