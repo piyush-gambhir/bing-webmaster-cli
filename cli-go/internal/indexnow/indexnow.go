@@ -1,6 +1,3 @@
-// Package indexnow implements the IndexNow protocol: key generation and checks,
-// host-grouped batch submission, and reading URLs from sitemaps. IndexNow needs
-// no Bing credentials; its key is public and hosted on the website.
 package indexnow
 
 import (
@@ -21,8 +18,6 @@ import (
 	"time"
 )
 
-// Endpoints are the documented shared endpoints; a submission to one reaches
-// every participating engine.
 var Endpoints = map[string]string{
 	"indexnow": "https://api.indexnow.org/indexnow",
 	"bing":     "https://www.bing.com/indexnow",
@@ -32,8 +27,6 @@ const MaxBatch = 10000
 
 var keyPattern = regexp.MustCompile(`^[A-Za-z0-9-]{8,128}$`)
 
-// GenerateKey returns a 32-character hexadecimal key, which satisfies both the
-// protocol page ("hexadecimal") and the FAQ (8-128 letters, digits, hyphens).
 func GenerateKey() (string, error) {
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {
@@ -46,10 +39,6 @@ func ValidKey(k string) bool { return keyPattern.MatchString(k) }
 
 func DefaultKeyLocation(host, key string) string { return "https://" + host + "/" + key + ".txt" }
 
-// CanonicalHost requests https://host/ and returns the host the site finally
-// serves pages from, so a site registered as example.com but served from
-// www.example.com gets its key on the host that appears in submitted URLs. Only
-// a www. variant of the same host is accepted; other redirects are ignored.
 func CanonicalHost(ctx context.Context, h *http.Client, host string) (string, error) {
 	c := *h
 	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
@@ -78,7 +67,6 @@ func CanonicalHost(ctx context.Context, h *http.Client, host string) (string, er
 	return host, nil
 }
 
-// HostOf returns the lowercased host of an absolute http(s) URL.
 func HostOf(raw string) (string, error) {
 	u, err := url.Parse(raw)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
@@ -87,8 +75,6 @@ func HostOf(raw string) (string, error) {
 	return strings.ToLower(u.Host), nil
 }
 
-// CheckKey fetches the key file and compares its content. Redirects are reported
-// rather than followed because engines may not follow them.
 func CheckKey(ctx context.Context, h *http.Client, keyLocation, key string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, keyLocation, nil)
 	if err != nil {
@@ -128,8 +114,6 @@ type Batch struct {
 	URLs []string `json:"urls" yaml:"urls"`
 }
 
-// Plan validates URLs, drops duplicates, and groups them by host into batches of
-// at most max URLs, keeping input order.
 func Plan(urls []string, max int) ([]Batch, error) {
 	if max <= 0 || max > MaxBatch {
 		max = MaxBatch
@@ -167,7 +151,6 @@ func Plan(urls []string, max int) ([]Batch, error) {
 	return batches, nil
 }
 
-// Meaning explains an IndexNow response status; ok is true for 200 and 202.
 func Meaning(status int) (string, bool) {
 	switch status {
 	case 200:
@@ -195,7 +178,6 @@ type Result struct {
 	OK      bool   `json:"ok" yaml:"ok"`
 }
 
-// Submit posts one batch. It never retries.
 func Submit(ctx context.Context, h *http.Client, endpoint string, b Batch, key, keyLocation string) (Result, error) {
 	body := map[string]any{"host": b.Host, "key": key, "urlList": b.URLs}
 	if keyLocation != "" {
@@ -223,7 +205,6 @@ func Submit(ctx context.Context, h *http.Client, endpoint string, b Batch, key, 
 	return Result{Host: b.Host, Count: len(b.URLs), Status: res.StatusCode, Meaning: meaning, OK: ok}, nil
 }
 
-// Entry is one sitemap URL.
 type Entry struct {
 	Loc     string `xml:"loc"`
 	LastMod string `xml:"lastmod"`
@@ -235,8 +216,6 @@ const (
 	maxEntries      = 500000
 )
 
-// ReadSitemap fetches a sitemap or sitemap index (one level of nesting) and
-// returns its URLs. Gzip content is detected by its magic bytes.
 func ReadSitemap(ctx context.Context, h *http.Client, sitemapURL string) ([]Entry, error) {
 	root, children, err := readOne(ctx, h, sitemapURL)
 	if err != nil {
@@ -319,7 +298,6 @@ func readOne(ctx context.Context, h *http.Client, sitemapURL string) (urls, site
 
 var lastmodLayouts = []string{time.RFC3339Nano, "2006-01-02T15:04Z07:00", "2006-01-02"}
 
-// ParseLastMod reads a W3C datetime lastmod value.
 func ParseLastMod(s string) (time.Time, bool) {
 	s = strings.TrimSpace(s)
 	for _, layout := range lastmodLayouts {
@@ -330,8 +308,6 @@ func ParseLastMod(s string) (time.Time, bool) {
 	return time.Time{}, false
 }
 
-// ChangedSince keeps entries whose lastmod is on or after since. Entries without
-// a usable lastmod are dropped and counted, never assumed changed.
 func ChangedSince(entries []Entry, since time.Time) (kept []string, missingLastmod int) {
 	for _, e := range entries {
 		t, ok := ParseLastMod(e.LastMod)

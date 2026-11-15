@@ -7,9 +7,6 @@ import (
 	"time"
 )
 
-// Fuzz targets for the code that parses untrusted responses. `go test` runs the
-// seeds; `go test -fuzz=FuzzParseMSDate ./internal/client` explores further.
-
 func FuzzParseMSDate(f *testing.F) {
 	for _, s := range []string{"/Date(1315349995284-0700)/", "/Date(0)/", "/Date(-62135596800000+0000)/", "/Date(-62135596800000-0700)/",
 		"/Date(253402300799999+0000)/", "/Date(9223372036854775807)/", "/Date(-1+9999)/", "Date(1)", ""} {

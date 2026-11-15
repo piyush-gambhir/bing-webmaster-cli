@@ -18,7 +18,6 @@ func TestRawAPIWritesNeedConfirmation(t *testing.T) {
 	if res = run(t, f, "", "api", "RemoveSite", "--data", data, "--no-input", "--yes"); res.err != nil || f.count() != 1 {
 		t.Fatalf("raw RemoveSite with --yes: err=%v calls=%d", res.err, f.count())
 	}
-	// Reads need no confirmation.
 	f.handle = func(r *http.Request, body string) *http.Response { return reply(200, sitesBody) }
 	if res = run(t, f, "", "api", "GetUserSites", "--no-input"); res.err != nil {
 		t.Fatalf("raw read: %v", res.err)

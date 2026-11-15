@@ -29,8 +29,6 @@ func (a *app) sitemapsCmd() *cobra.Command {
 	return c
 }
 
-// readURLs collects URLs from arguments and an optional file ("-" for stdin),
-// skipping blank lines and # comments, validating, and removing duplicates.
 func (a *app) readURLs(args []string, file string) ([]string, error) {
 	list := append([]string{}, args...)
 	if file != "" {
@@ -219,7 +217,6 @@ func (a *app) fetchCmd() *cobra.Command {
 	return c
 }
 
-// convert applies date conversion unless --raw.
 func (a *app) convert(v any) any {
 	if a.raw {
 		return v

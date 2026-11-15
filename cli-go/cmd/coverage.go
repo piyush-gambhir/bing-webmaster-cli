@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// APICoverage maps each Bing method to the runnable commands that call it.
 func APICoverage(root *cobra.Command) map[string][]string {
 	m := map[string][]string{}
 	var walk func(*cobra.Command)
@@ -41,7 +40,6 @@ var beyondAPI = [][3]string{
 	{"Bing Search APIs (Web Search API)", "Out of scope", "A separate product, retired 2025-08-11; it does not affect the Webmaster API."},
 }
 
-// APICoverageMarkdown renders docs/api-coverage.md from the registry and the command tree.
 func APICoverageMarkdown(root *cobra.Command) string {
 	cov := APICoverage(root)
 	counts := map[registry.Status]int{}

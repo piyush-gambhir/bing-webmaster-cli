@@ -45,7 +45,6 @@ func TestMSDates(t *testing.T) {
 	if _, ok := ParseMSDate("2011-09-06"); ok {
 		t.Fatal("parsed a plain date")
 	}
-	// Escaped slashes decode to the same string before conversion.
 	var v any
 	if err := json.Unmarshal([]byte(`{"d":[{"Date":"\/Date(0)\/","Query":"x"}]}`), &v); err != nil {
 		t.Fatal(err)
@@ -109,7 +108,6 @@ func TestPostBodyAndNullAndBoolResults(t *testing.T) {
 	if err != nil || got != false {
 		t.Fatalf("bool result: %#v %v", got, err)
 	}
-	// Request-body dates use the Microsoft format.
 	if encodeBody(map[string]any{"Date": time.UnixMilli(0)}).(map[string]any)["Date"] != "/Date(0+0000)/" {
 		t.Fatal("body date encoding")
 	}

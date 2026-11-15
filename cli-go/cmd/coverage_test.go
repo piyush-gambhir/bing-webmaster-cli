@@ -45,7 +45,6 @@ func TestEveryMethodHasACommand(t *testing.T) {
 	}
 }
 
-// A command is marked mutating exactly when one of its Bing methods writes.
 func TestMutatesMatchesRegistry(t *testing.T) {
 	var walk func(*cobra.Command)
 	walk = func(c *cobra.Command) {

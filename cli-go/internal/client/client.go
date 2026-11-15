@@ -1,6 +1,3 @@
-// Package client calls the Bing Webmaster JSON API. It unwraps the {"d": ...}
-// envelope, detects faults even under HTTP 200, keeps API keys out of every log
-// line and error, and refuses state-changing calls in read-only mode.
 package client
 
 import (
@@ -21,14 +18,11 @@ import (
 )
 
 const (
-	// KeyBase is the documented host for API-key calls.
-	KeyBase = "https://ssl.bing.com/webmaster/api.svc/json"
-	// BearerBase is the host Bing's OAuth guide uses for bearer-token calls.
+	KeyBase     = "https://ssl.bing.com/webmaster/api.svc/json"
 	BearerBase  = "https://www.bing.com/webmaster/api.svc/json"
 	maxResponse = 32 << 20
 )
 
-// Planned is a write that --dry-run printed instead of sending.
 type Planned struct {
 	Method string `json:"method" yaml:"method"`
 	HTTP   string `json:"http" yaml:"http"`
@@ -37,23 +31,18 @@ type Planned struct {
 }
 
 type Client struct {
-	HTTP   *http.Client
-	Base   string
-	APIKey string
-	// Token returns a bearer token; it is called only when a request is sent.
+	HTTP     *http.Client
+	Base     string
+	APIKey   string
 	Token    func(context.Context) (string, error)
 	Log      io.Writer
 	ReadOnly bool
 	DryRun   bool
 	Planned  []Planned
 
-	// bearer is the token sent on the current request, kept so diagnostics can
-	// redact it like the API key.
 	bearer string
 }
 
-// New returns a client that never follows redirects, so credentials cannot be
-// forwarded to another host.
 func New(timeout time.Duration) *Client {
 	return &Client{HTTP: &http.Client{Timeout: timeout, CheckRedirect: func(*http.Request, []*http.Request) error {
 		return http.ErrUseLastResponse
@@ -62,7 +51,6 @@ func New(timeout time.Duration) *Client {
 
 var methodName = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]*$`)
 
-// Call invokes a documented method with exactly its documented parameters.
 func (c *Client) Call(ctx context.Context, method string, params map[string]any) (any, error) {
 	op, ok := registry.Lookup(method)
 	if !ok {
@@ -86,8 +74,6 @@ func (c *Client) Call(ctx context.Context, method string, params map[string]any)
 	return c.Do(ctx, method, op.HTTP, op.Effect, params)
 }
 
-// Do sends one request. The raw `api` command uses it directly so methods outside
-// the registry still get the same transport, redaction, and fault handling.
 func (c *Client) Do(ctx context.Context, method, verb string, effect registry.Effect, params map[string]any) (any, error) {
 	if !methodName.MatchString(method) {
 		return nil, fmt.Errorf("invalid method name %q", method)
@@ -185,7 +171,6 @@ func (c *Client) decode(method string, res *http.Response, b []byte) (any, error
 			decodeErr = errors.New("trailing content")
 		}
 	}
-	// Faults can arrive under HTTP 400 (documented) or 200 (observed).
 	if m, ok := data.(map[string]any); ok && decodeErr == nil {
 		if _, hasD := m["d"]; !hasD {
 			if code, ok := faultCode(m["ErrorCode"]); ok {
@@ -241,8 +226,6 @@ func faultCode(v any) (int, bool) {
 	return 0, false
 }
 
-// redact removes the API key and the bearer token, in plain and URL-encoded
-// form, from s.
 func (c *Client) redact(s string) string {
 	for _, secret := range []string{c.APIKey, c.bearer} {
 		if secret != "" {
@@ -260,8 +243,6 @@ func encodeQuery(v any) string {
 	case bool:
 		return strconv.FormatBool(x)
 	case time.Time:
-		// Date-only form; Bing does not document the accepted DateTime syntax for
-		// query parameters, and ISO dates parse under WCF's query converter.
 		return x.Format("2006-01-02")
 	default:
 		return fmt.Sprint(x)

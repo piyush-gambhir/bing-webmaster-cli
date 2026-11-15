@@ -86,8 +86,6 @@ func (a *app) doctorCmd() *cobra.Command {
 	return c
 }
 
-// pathCheck finds every bwt executable on PATH; another tool (Bitcoin Wallet
-// Tracker) also installs a bwt binary.
 func pathCheck() (string, string, string) {
 	self, _ := os.Executable()
 	self, _ = filepath.EvalSymlinks(self)

@@ -20,7 +20,7 @@ import (
 const keychainService = "bing-webmaster-cli"
 
 type creds struct {
-	kind    string // access_token or api_key
+	kind    string
 	source  string
 	profile string
 	apiKey  string
@@ -46,12 +46,9 @@ func (a *app) store() (secrets.Store, error) {
 		return secrets.Store{}, err
 	}
 	def, _ := config.DefaultPath()
-	// One keychain namespace per configuration file, so per-environment configs
-	// with the same profile names never overwrite each other's credentials.
 	return secrets.Store{Service: secrets.ServiceFor(keychainService, cfgPath, def), FilePath: path}, nil
 }
 
-// httpClient builds a client that never follows redirects.
 func (a *app) httpClient() *http.Client {
 	h := &http.Client{Timeout: a.timeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	if a.transport != nil {
@@ -60,7 +57,6 @@ func (a *app) httpClient() *http.Client {
 	return h
 }
 
-// webClient follows a few redirects; it is for public pages (sitemaps), never credentials.
 func (a *app) webClient() *http.Client {
 	h := &http.Client{Timeout: a.timeout}
 	if a.transport != nil {
@@ -69,8 +65,6 @@ func (a *app) webClient() *http.Client {
 	return h
 }
 
-// resolve picks credentials: --access-token, BWT_ACCESS_TOKEN, --api-key,
-// BWT_API_KEY, then the selected profile.
 func (a *app) resolve() (*creds, error) {
 	if a.accessToken != "" {
 		tok := strings.TrimSpace(a.accessToken)
@@ -96,7 +90,6 @@ func (a *app) resolve() (*creds, error) {
 	return a.profileCreds(cfg, path, name)
 }
 
-// profileCreds loads the saved credentials of one profile, ignoring flags and environment.
 func (a *app) profileCreds(cfg *config.Config, path, name string) (*creds, error) {
 	p, ok := cfg.Profiles[name]
 	if !ok {
@@ -116,15 +109,13 @@ func (a *app) profileCreds(cfg *config.Config, path, name string) (*creds, error
 			return nil, err
 		}
 		return &creds{kind: "api_key", source: "profile:" + name, profile: name, apiKey: key}, nil
-	case "oauth": // written by v0.1.1
+	case "oauth":
 		return nil, fmt.Errorf("profile %q used browser login, which bwt no longer supports; run bwt auth login --profile %s with your API key", name, name)
 	default:
 		return nil, fmt.Errorf("profile %q has no Bing credentials; run bwt auth login --profile %s", name, name)
 	}
 }
 
-// bearerBase is the host for --access-token / BWT_ACCESS_TOKEN calls; Bing's
-// OAuth guide uses www.bing.com, and BWT_OAUTH_API_HOST=ssl.bing.com switches.
 func bearerBase() string {
 	if os.Getenv("BWT_OAUTH_API_HOST") == "ssl.bing.com" {
 		return client.KeyBase
@@ -132,7 +123,6 @@ func bearerBase() string {
 	return client.BearerBase
 }
 
-// api returns a client for the resolved credentials.
 func (a *app) api() (*client.Client, error) {
 	cr, err := a.resolve()
 	if err != nil {
@@ -158,8 +148,6 @@ func (a *app) clientFor(cr *creds) *client.Client {
 	return c
 }
 
-// siteURL resolves --site, BWT_SITE, then the profile's default site. A bare host
-// is matched against the account's sites; full URLs are used exactly as given.
 func (a *app) siteURL(ctx context.Context, c *client.Client) (string, error) {
 	s := strings.TrimSpace(a.site)
 	if s == "" {
@@ -209,8 +197,6 @@ func (a *app) matchSite(ctx context.Context, c *client.Client, host string) (str
 	}
 }
 
-// confirm asks before a destructive change; --yes skips the prompt and
-// --no-input without --yes refuses.
 func (a *app) confirm(prompt string) error {
 	if a.yes || a.dryRun {
 		return nil

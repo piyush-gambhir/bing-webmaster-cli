@@ -24,7 +24,6 @@ func (a *app) indexnowCmd() *cobra.Command {
 	return c
 }
 
-// defaultHost derives a host from --site, BWT_SITE, or the profile's site without any network call.
 func (a *app) defaultHost() string {
 	s := a.site
 	if s == "" {
@@ -47,9 +46,6 @@ func (a *app) defaultHost() string {
 	return ""
 }
 
-// servingHost is the selected site's host, switched to its www (or non-www)
-// variant when the site redirects there, because IndexNow keys must live on the
-// host that serves the submitted URLs.
 func (a *app) servingHost(ctx context.Context) string {
 	host := a.defaultHost()
 	if host == "" {
@@ -125,7 +121,6 @@ func (a *app) indexnowGenerateCmd() *cobra.Command {
 	return c
 }
 
-// keyFor finds the key and key location for a host: --key, then BWT_INDEXNOW_KEY, then the profile.
 func (a *app) keyFor(host, flagKey, flagLocation string) (string, string, error) {
 	k, location := flagKey, flagLocation
 	if k == "" {

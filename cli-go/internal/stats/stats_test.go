@@ -14,7 +14,6 @@ func row(date string, clicks, impressions int) map[string]any {
 func day(s string) time.Time { t, _ := time.Parse("2006-01-02", s); return t }
 
 func TestDayKeepsBingOffset(t *testing.T) {
-	// 23:30 at -07:00 is still September 1 for Bing, even though it is September 2 in UTC.
 	d, ok := Day(map[string]any{"Date": "2026-09-01T23:30:00-07:00"})
 	if !ok || d.Format("2006-01-02") != "2026-09-01" {
 		t.Fatal(d)

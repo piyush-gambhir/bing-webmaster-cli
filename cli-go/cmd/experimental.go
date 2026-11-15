@@ -41,7 +41,6 @@ func (a *app) geoCmd() *cobra.Command {
 		if err != nil {
 			return nil, err
 		}
-		// Bing accepts lowercase country codes only (us); US is rejected as InvalidParameter.
 		return map[string]any{"settings": map[string]any{"Url": url, "TwoLetterIsoCountryCode": strings.ToLower(country), "Type": t}}, nil
 	}
 	flags := func(c *cobra.Command) func() (map[string]any, error) {
@@ -111,7 +110,6 @@ func (a *app) deepLinkBlocksCmd() *cobra.Command {
 			if err := requireURL("--deep-link-url", deepLinkURL); err != nil {
 				return nil, err
 			}
-			// Bing accepts lowercase market codes only (en-us); en-US is rejected as InvalidParameter.
 			return map[string]any{"market": strings.ToLower(market), "searchUrl": searchURL, "deepLinkUrl": deepLinkURL}, nil
 		}
 	}
