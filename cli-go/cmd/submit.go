@@ -170,6 +170,7 @@ func (a *app) quotaCmd() *cobra.Command {
 		contentQuota, err := cl.Call(cmd.Context(), "GetContentSubmissionQuota", map[string]any{"siteUrl": site})
 		if err != nil {
 			result["content_submission_error"] = err.Error()
+			a.info("Content submission quota unavailable: %v", err)
 		} else {
 			result["content_submission"] = contentQuota
 			rows = append(rows, quotaRow("content submission", contentQuota))

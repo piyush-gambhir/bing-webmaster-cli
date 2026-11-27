@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/piyush-gambhir/bing-webmaster-cli/cli-go/internal/registry"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -47,9 +48,21 @@ func (a *app) commandsCmd() *cobra.Command {
 				res.Effect, res.Conditional = "remote_write", ann["mutates"] == "conditional"
 			case ann["writes-local"] != "" || ann["self-update"] != "":
 				res.Effect, res.Conditional = "local_write", ann["writes-local"] == "conditional"
+			case target.Parent() == probe && target.Name() == "api":
+				res.Effect = "remote_write"
+				if len(res.Args) == 1 {
+					if op, ok := registry.Lookup(res.Args[0]); ok && op.Effect == registry.Read {
+						res.Effect = "read"
+					}
+				}
 			}
 			res.Interactive = ann["interactive"] == "true"
-			target.Flags().Visit(func(f *pflag.Flag) { res.Flags[f.Name] = f.Value.String() })
+			target.Flags().Visit(func(f *pflag.Flag) {
+				res.Flags[f.Name] = f.Value.String()
+				if f.Name == "api-key" || f.Name == "access-token" {
+					res.Flags[f.Name] = "[REDACTED]"
+				}
+			})
 			return a.print(res)
 		}})
 	return c
