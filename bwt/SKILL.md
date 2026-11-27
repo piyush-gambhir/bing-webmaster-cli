@@ -32,8 +32,10 @@ Use the installed `bwt` binary. Every subcommand has `--help`; the full referenc
 ## Safety
 
 - Use `--read-only` unless the user asked for a change. Run writes with `--dry-run` first and show the plan.
-- Destructive commands (remove, block) need `--yes` with `--no-input`; pass it only when the user asked for
-  that exact change.
+- `sites remove`, `sitemaps remove`, `users remove`, `block add --request full-removal`, `submit content`,
+  `experimental site-move submit`, and `api` writes need `--yes` with `--no-input`; pass it only when the
+  user asked for that exact change. Other remote writes, including the other `remove` and `block` commands, run
+  without a prompt.
 - Check `bwt quota` before large `submit urls` runs. Repeated submissions spend quota even for the same URL.
 
 ## Updating bwt

@@ -309,13 +309,16 @@ func ParseLastMod(s string) (time.Time, bool) {
 }
 
 func ChangedSince(entries []Entry, since time.Time) (kept []string, missingLastmod int) {
+	sy, sm, sd := since.Date()
+	floor := time.Date(sy, sm, sd, 0, 0, 0, 0, time.UTC)
 	for _, e := range entries {
 		t, ok := ParseLastMod(e.LastMod)
 		if !ok {
 			missingLastmod++
 			continue
 		}
-		if !t.Before(since) {
+		y, m, d := t.Date()
+		if !time.Date(y, m, d, 0, 0, 0, 0, time.UTC).Before(floor) {
 			kept = append(kept, strings.TrimSpace(e.Loc))
 		}
 	}

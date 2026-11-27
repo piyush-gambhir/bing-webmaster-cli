@@ -103,3 +103,19 @@ func TestFetchGetSaveWritesTheDocument(t *testing.T) {
 		t.Fatalf("table must summarize, not dump the document: %q", res.out)
 	}
 }
+
+func TestQuotaReportsAFailedContentQuota(t *testing.T) {
+	isolate(t)
+	t.Setenv("BWT_API_KEY", "k")
+	t.Setenv("BWT_SITE", "https://www.example.com/")
+	f := &fake{handle: func(r *http.Request, body string) *http.Response {
+		if filepath.Base(r.URL.Path) == "GetContentSubmissionQuota" {
+			return reply(400, `{"ErrorCode":14,"Message":"NotAuthorized"}`)
+		}
+		return reply(200, `{"d":{"DailyQuota":10,"MonthlyQuota":300}}`)
+	}}
+	res := run(t, f, "", "quota")
+	if res.err != nil || !strings.Contains(res.out, "url submission") || !strings.Contains(res.errOut, "Content submission quota unavailable") {
+		t.Fatalf("quota: %v out=%q err=%q", res.err, res.out, res.errOut)
+	}
+}

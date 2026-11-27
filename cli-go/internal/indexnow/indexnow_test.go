@@ -122,3 +122,23 @@ func TestReadSitemapIndexGzipAndChangedSince(t *testing.T) {
 		t.Fatal("404 sitemap accepted")
 	}
 }
+
+func TestChangedSinceComparesTheLastmodCalendarDate(t *testing.T) {
+	entries := []Entry{
+		{Loc: "https://example.com/early", LastMod: "2026-10-01T00:30:00+02:00"},
+		{Loc: "https://example.com/late", LastMod: "2026-09-30T23:00:00-05:00"},
+		{Loc: "https://example.com/day", LastMod: "2026-10-01"},
+	}
+	kept, _ := ChangedSince(entries, time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC))
+	if strings.Join(kept, ",") != "https://example.com/early,https://example.com/day" {
+		t.Fatalf("kept=%v", kept)
+	}
+}
+
+func TestChangedSinceKeepsSameDayLastmodBeforeSinceInstant(t *testing.T) {
+	entries := []Entry{{Loc: "https://example.com/a", LastMod: "2026-10-01T03:00:00Z"}}
+	kept, _ := ChangedSince(entries, time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC))
+	if len(kept) != 1 {
+		t.Fatalf("kept=%v", kept)
+	}
+}

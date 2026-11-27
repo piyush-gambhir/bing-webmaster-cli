@@ -11,8 +11,10 @@ nothing else is needed.
 - Run commands with `-o json --no-input`. Data is on stdout; notes and structured errors are on stderr.
 - Use `--read-only` unless the user asked for a change. It blocks every command that changes Bing state,
   local credentials, or the binary itself.
-- Run writes with `--dry-run` first and show the plan. Destructive commands (remove, block) also need
-  `--yes` under `--no-input`; pass it only when the user asked for that exact change.
+- Run writes with `--dry-run` first and show the plan. `sites remove`, `sitemaps remove`, `users remove`,
+  `block add --request full-removal`, `submit content`, `experimental site-move submit`, and `api` writes
+  also need `--yes` under `--no-input`; pass it only when the user asked for that exact change. Other remote
+  writes, including the other `remove` and `block` commands, run without a prompt.
 - Never invent, print, or log an API key. If `bwt auth status -o json` fails, ask the user to run
   `bwt auth login` or to set `BWT_API_KEY`.
 
